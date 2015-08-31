@@ -1,4 +1,6 @@
 require 'uri'
+require 'faraday'
+require 'faraday_middleware'
 
 module GoogleMaps
   class Client
@@ -6,14 +8,12 @@ module GoogleMaps
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
     RETRIABLE_STATUSES = [500, 503, 504]
 
-    # DEFAULT_CONNECTION_MIDDLEWARE = [
-    #   Faraday::Request::Multipart,
-    #   Faraday::Request::UrlEncoded,
-    #   FaradayMiddleware::Mashify,
-    #   FaradayMiddleware::ParseJson
-    # ]
+    DEFAULT_CONNECTION_MIDDLEWARE = [
+      Faraday::Request::UrlEncoded,
+      FaradayMiddleware::ParseJson
+    ]
 
-    #
+    include GoogleMaps::Geocoding
 
     attr_reader :key, :client_id, :client_secret
 
@@ -22,8 +22,30 @@ module GoogleMaps
       @client_id = options[:client_id] || GoogleMaps.client_id
       @client_secret = options[:key] || GoogleMaps.client_secret
       @ssl = options[:ssl] || GoogleMaps.ssl || Hash.new
+
       @connection_middleware = options[:connection_middleware] || GoogleMaps.connection_middleware || []
       @connection_middleware += DEFAULT_CONNECTION_MIDDLEWARE
+    end
+
+    def connection
+      headers = {
+        :accept =>  'application/json',
+        :user_agent => USER_AGENT
+      }
+
+      @connection ||= Faraday::Connection.new(:ssl => @ssl, :headers => headers) do |builder|
+        @connection_middleware.each do |middleware|
+          builder.use *middleware
+        end
+        builder.adapter  :net_http
+      end
+    end
+
+    def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true)
+      url = base_url + generate_auth_url(path, params, accepts_client_id)
+      response = connection.get url
+      response.status
+      response.body
     end
 
     # Returns the path and query string portion of the request URL,
@@ -33,7 +55,7 @@ module GoogleMaps
     # @param [Hash] params URL parameters.
     #
     # @return [String]
-    def generate_auth_url(path, params, accepts_clientid)
+    def generate_auth_url(path, params, accepts_client_id)
       # Deterministic ordering through sorting by key.
       # Useful for tests, and in the future, any caching.
       if params.kind_of?(Hash)
@@ -42,17 +64,17 @@ module GoogleMaps
         params = params.dup
       end
 
-      if accepts_clientid and @client_id and @client_secret
+      if accepts_client_id and @client_id and @client_secret
         params << ["client", @client_id]
 
-        path = [path, urlencode_params(params)].join("?")
+        path = [path, self.class.urlencode_params(params)].join("?")
         sig = sign_hmac(@client_secret, path)
         return path + "&signature=" + sig
       end
 
       if @key
         params << ["key", @key]
-        return path + "?" + urlencode_params(params)
+        return path + "?" + self.class.urlencode_params(params)
       end
 
       raise ArgumentError, "Must provide API key for this API. It does not accept enterprise credentials."
