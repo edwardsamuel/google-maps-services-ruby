@@ -1,8 +1,8 @@
 require 'uri'
 
-module GoogleMapsServices
+module GoogleMaps
   class Client
-    USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsServices::VERSION}"
+    USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMaps::VERSION}"
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
     RETRIABLE_STATUSES = [500, 503, 504]
 
@@ -18,11 +18,11 @@ module GoogleMapsServices
     attr_reader :key, :client_id, :client_secret
 
     def initialize(options={})
-      @key = options[:key] || GoogleMapsServices.key
-      @client_id = options[:client_id] || GoogleMapsServices.client_id
-      @client_secret = options[:key] || GoogleMapsServices.client_secret
-      @ssl = options[:ssl] || GoogleMapsServices.ssl || Hash.new
-      @connection_middleware = options[:connection_middleware] || GoogleMapsServices.connection_middleware || []
+      @key = options[:key] || GoogleMaps.key
+      @client_id = options[:client_id] || GoogleMaps.client_id
+      @client_secret = options[:key] || GoogleMaps.client_secret
+      @ssl = options[:ssl] || GoogleMaps.ssl || Hash.new
+      @connection_middleware = options[:connection_middleware] || GoogleMaps.connection_middleware || []
       @connection_middleware += DEFAULT_CONNECTION_MIDDLEWARE
     end
 

@@ -4,7 +4,7 @@ require 'date'
 class ClientTest < Minitest::Test
 
   def test_urlencode
-    encoded_params = GoogleMapsServices::Client.urlencode_params([["address", "=Sydney ~"]])
+    encoded_params = GoogleMaps::Client.urlencode_params([["address", "=Sydney ~"]])
     assert_equal("address=%3DSydney+~", encoded_params)
   end
 
@@ -18,6 +18,6 @@ class ClientTest < Minitest::Test
     key = "a2V5" # "key" -> base64
     signature = "3nybhbi3iqa8ino29wqQcBydtNk="
 
-    assert_equal(signature, GoogleMapsServices::Client.sign_hmac(key, message))
+    assert_equal(signature, GoogleMaps::Client.sign_hmac(key, message))
   end
 end
