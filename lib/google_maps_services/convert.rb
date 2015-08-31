@@ -1,7 +1,8 @@
 module GoogleMapsServices
 
-  # Converts Python types to string representations suitable for Maps API server.
+  # Converts Ruby types to string representations suitable for Maps API server.
   module Convert
+    module_function
 
     # Converts a lat/lon pair to a comma-separated string.
     #
@@ -14,7 +15,7 @@ module GoogleMapsServices
     # @return [String] Comma-separated lat/lng.
     #
     # @raise [ArgumentError] When argument is not lat/lng hash or array.
-    def self.latlng(arg)
+    def latlng(arg)
       return "%f,%f" % normalize_lat_lng(arg)
     end
 
@@ -28,7 +29,7 @@ module GoogleMapsServices
     # @param [Hash, Array] arg The lat/lon hash or array pair.
     #
     # @return [Array] Pair of lat and lng array.
-    def self.normalize_lat_lng(arg)
+    def normalize_lat_lng(arg)
       if arg.kind_of?(Hash)
           if arg.has_key?(:lat) and arg.has_key?(:lng)
               return arg[:lat], arg[:lng]
@@ -55,7 +56,7 @@ module GoogleMapsServices
     # @param [Array, String] arg Value to coerce into a list.
     #
     # @return [String]
-    def self.join_list(sep, arg)
+    def join_list(sep, arg)
       return as_list(arg).join(sep)
     end
 
@@ -65,7 +66,7 @@ module GoogleMapsServices
     # @param [Object] arg
     #
     # @return [Array]
-    def self.as_list(arg)
+    def as_list(arg)
       if arg.kind_of?(Array)
           return arg
       end
@@ -82,7 +83,7 @@ module GoogleMapsServices
     # @param [Time, Date, DateTime, Integer] arg The time.
     #
     # @return [String] String representation of epoch time
-    def self.time(arg)
+    def time(arg)
       if arg.kind_of?(DateTime)
         arg = arg.to_time
       end
@@ -99,7 +100,7 @@ module GoogleMapsServices
     # @param [Hash] arg The component filter.
     #
     # @return [String]
-    def self.components(arg)
+    def components(arg)
       if arg.kind_of?(Hash)
         arg = arg.sort.map { |k, v| "#{k}:#{v}" }
         return arg.join("|")
@@ -134,7 +135,7 @@ module GoogleMapsServices
     # @param [Hash] arg The bounds.
     #
     # @return [String]
-    def self.bounds(arg)
+    def bounds(arg)
       if arg.kind_of?(Hash)
         if arg.has_key?("southwest") && arg.has_key?("northeast")
           return "#{latlng(arg["southwest"])}|#{latlng(arg["northeast"])}"
@@ -154,7 +155,7 @@ module GoogleMapsServices
     # @param [String] polyline An encoded polyline
     #
     # @return [Array] Array of hash with lat/lng keys
-    def self.decode_polyline(polyline)
+    def decode_polyline(polyline)
       points = []
       index = lat = lng = 0
 
@@ -195,7 +196,7 @@ module GoogleMapsServices
     # @param [Array<Hash>, Array<Array>] points A list of lat/lng pairs.
     #
     # @return [String]
-    def self.encode_polyline(points)
+    def encode_polyline(points)
       last_lat = last_lng = 0
       result = ""
 
