@@ -1,17 +1,12 @@
 require 'uri'
-require 'faraday'
-require 'faraday_middleware'
+require 'hurley'
+require 'multi_json'
 
 module GoogleMaps
   class Client
     USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMaps::VERSION}"
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
     RETRIABLE_STATUSES = [500, 503, 504]
-
-    DEFAULT_CONNECTION_MIDDLEWARE = [
-      Faraday::Request::UrlEncoded,
-      FaradayMiddleware::ParseJson
-    ]
 
     include GoogleMaps::Geocoding
 
@@ -21,31 +16,29 @@ module GoogleMaps
       @key = options[:key] || GoogleMaps.key
       @client_id = options[:client_id] || GoogleMaps.client_id
       @client_secret = options[:key] || GoogleMaps.client_secret
-      @ssl = options[:ssl] || GoogleMaps.ssl || Hash.new
-
-      @connection_middleware = options[:connection_middleware] || GoogleMaps.connection_middleware || []
-      @connection_middleware += DEFAULT_CONNECTION_MIDDLEWARE
     end
 
-    def connection
-      headers = {
-        :accept =>  'application/json',
-        :user_agent => USER_AGENT
-      }
+    # Get the current HTTP client
+    # @return [Hurley::Client]
+    def client
+      @client ||= new_client
+    end
 
-      @connection ||= Faraday::Connection.new(:ssl => @ssl, :headers => headers) do |builder|
-        @connection_middleware.each do |middleware|
-          builder.use *middleware
-        end
-        builder.adapter  :net_http
-      end
+    protected
+
+    # Create a new HTTP client
+    # @return [Hurley::Client]
+    def new_client
+      client = Hurley::Client.new
+      client.request_options.query_class = Hurley::Query::Flat
+      client.header[:user_agent] = USER_AGENT
+      client
     end
 
     def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
-      response = connection.get url
-      response.status
-      response.body
+      response = client.get url
+      MultiJson.load(response.body)
     end
 
     # Returns the path and query string portion of the request URL,
@@ -79,8 +72,6 @@ module GoogleMaps
 
       raise ArgumentError, "Must provide API key for this API. It does not accept enterprise credentials."
     end
-
-
 
     # Returns a base64-encoded HMAC-SHA1 signature of a given string.
     #

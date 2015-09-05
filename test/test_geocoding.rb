@@ -1,6 +1,6 @@
 require 'minitest_helper'
 require 'date'
-# require 'awesome_print'
+require 'awesome_print'
 
 class GeocodingTest < Minitest::Test
 
@@ -14,7 +14,7 @@ class GeocodingTest < Minitest::Test
 
   def test_simple_geocode
     result = @client.geocode('Sydney')
-    # awesome_print result
+    awesome_print result
   end
 
 end
