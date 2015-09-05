@@ -35,10 +35,58 @@ module GoogleMaps
       client
     end
 
-    def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true)
+    def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true, extract_body=nil)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
       response = client.get url
-      MultiJson.load(response.body)
+
+      if (extract_body)
+        return extract_body(response)
+      end
+      return default_extract_body(response)
+    end
+
+    def default_extract_body(response)
+      case response.status_code
+      when 200..300
+        # Do-nothing
+      when 301, 302, 303, 307
+        message ||= sprintf('Redirect to %s', response.header[:location])
+        raise GoogleMaps::RedirectError.new(response), message
+      when 401
+        message ||= 'Unauthorized'
+        raise GoogleMaps::AuthorizationError.new(response)
+      when 304, 400, 402...500
+        message ||= 'Invalid request'
+        raise GoogleMaps::ClientError.new(response)
+      when 500..600
+        message ||= 'Server error'
+        raise GoogleMaps::ServerError.new(response)
+      else
+        message ||= 'Unknown error'
+        raise GoogleMaps::TransmissionError.new(response)
+      end
+
+      body = MultiJson.load(response.body, :symbolize_keys => true)
+
+      api_status = body[:status]
+      if api_status == "OK" or api_status == "ZERO_RESULTS"
+        return body
+      end
+
+      if api_status == "OVER_QUERY_LIMIT"
+        raise GoogleMaps::RateLimitError.new(response), body[:error_message]
+      end
+
+      if api_status == "REQUEST_DENIED"
+        message ||= 'Unauthorized'
+        raise GoogleMaps::AuthorizationError.new(response), body[:error_message]
+      end
+
+      if body[:error_message]
+        raise GoogleMaps::ApiError.new(response), body[:error_message]
+      else
+        raise GoogleMaps::ApiError.new(response)
+      end
     end
 
     # Returns the path and query string portion of the request URL,
