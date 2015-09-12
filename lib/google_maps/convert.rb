@@ -16,7 +16,7 @@ module GoogleMaps
     #
     # @raise [ArgumentError] When argument is not lat/lng hash or array.
     def latlng(arg)
-      return "%f,%f" % normalize_lat_lng(arg)
+      return "%f,%f" % normalize_latlng(arg)
     end
 
     # Take the various lat/lng representations and return a tuple.
@@ -29,7 +29,7 @@ module GoogleMaps
     # @param [Hash, Array] arg The lat/lon hash or array pair.
     #
     # @return [Array] Pair of lat and lng array.
-    def normalize_lat_lng(arg)
+    def normalize_latlng(arg)
       if arg.kind_of?(Hash)
           if arg.has_key?(:lat) and arg.has_key?(:lng)
               return arg[:lat], arg[:lng]
@@ -182,7 +182,7 @@ module GoogleMaps
         end
         lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
 
-        points << {"lat" => lat * 1e-5, "lng" => lng * 1e-5}
+        points << {lat: lat * 1e-5, lng: lng * 1e-5}
       end
 
       points
@@ -201,7 +201,7 @@ module GoogleMaps
       result = ""
 
       points.each do |point|
-        ll = normalize_lat_lng(point)
+        ll = normalize_latlng(point)
         lat = (ll[0] * 1e5).round.to_i
         lng = (ll[1] * 1e5).round.to_i
         d_lat = lat - last_lat

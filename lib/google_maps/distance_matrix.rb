@@ -39,8 +39,8 @@ module GoogleMaps
                         departure_time=nil, arrival_time=nil, transit_mode=nil,
                         transit_routing_preference=nil)
       params = {
-        "origins": _convert_path(origins),
-        "destinations": _convert_path(destinations)
+        origins: _convert_path(origins),
+        destinations: _convert_path(destinations)
       }
 
       if mode
@@ -49,29 +49,29 @@ module GoogleMaps
         unless ["driving", "walking", "bicycling", "transit"].contains?(mode)
           raise ArgumentError, "Invalid travel mode."
         end
-        params["mode"] = mode
+        params[:mode] = mode
       end
 
-      params["language"] = language if language
+      params[:language] = language if language
 
       if avoid
         unless ["tolls", "highways", "ferries"].contains?(avoid)
           raise ArgumentError, "Invalid route restriction."
         end
-        params["avoid"] = avoid
+        params[:avoid] = avoid
       end
 
 
-      params["units"] = units if units
-      params["departure_time"] = convert.time(departure_time) if departure_time
-      params["arrival_time"] = convert.time(arrival_time) if arrival_time
+      params[:units] = units if units
+      params[:departure_time] = convert.time(departure_time) if departure_time
+      params[:arrival_time] = convert.time(arrival_time) if arrival_time
 
       if departure_time and arrival_time
         raise ArgumentError, "Should not specify both departure_time and arrival_time."
       end
 
-      params["transit_mode"] = convert.join_list("|", transit_mode) if transit_mode
-      params["transit_routing_preference"] = transit_routing_preference if transit_routing_preference
+      params[:transit_mode] = convert.join_list("|", transit_mode) if transit_mode
+      params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
 
       return get("/maps/api/distancematrix/json", params)
     end

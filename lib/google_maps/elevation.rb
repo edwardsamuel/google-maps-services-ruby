@@ -18,9 +18,9 @@ module GoogleMaps
         locations = [locations]
       end
 
-      params["locations"] = _convert_locations(locations)
+      params[:locations] = _convert_locations(locations)
 
-      return get("/maps/api/elevation/json", params)["results"]
+      return get("/maps/api/elevation/json", params)[:results]
     end
 
     # Provides elevation data sampled along a path on the surface of the earth.
@@ -41,11 +41,11 @@ module GoogleMaps
       end
 
       params = {
-        "path": path,
-        "samples": samples
+        path: path,
+        samples: samples
       }
 
-      return get("/maps/api/elevation/json", params)["results"]
+      return get("/maps/api/elevation/json", params)[:results]
     end
 
     private

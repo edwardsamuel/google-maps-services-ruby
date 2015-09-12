@@ -1,3 +1,5 @@
+require 'google_maps/convert'
+
 module GoogleMaps
 
   # Performs requests to the Google Maps Geocoding API.
@@ -21,13 +23,13 @@ module GoogleMaps
     def geocode(address=nil, components=nil, bounds=nil, region=nil, language=nil)
       params = {}
 
-      params["address"] = address if address
-      params["components"] = GoogleMaps::Convert.components(components) if components
-      params["bounds"] = GoogleMaps::Convert.bounds(bounds) if bounds
-      params["region"] = region if region
-      params["language"] = language if language
+      params[:address] = address if address
+      params[:components] = GoogleMaps::Convert.components(components) if components
+      params[:bounds] = GoogleMaps::Convert.bounds(bounds) if bounds
+      params[:region] = region if region
+      params[:language] = language if language
 
-      return get("/maps/api/geocode/json", params)["results"]
+      return get("/maps/api/geocode/json", params)[:results]
     end
 
     # Reverse geocoding is the process of converting geographic coordinates into a
@@ -42,14 +44,14 @@ module GoogleMaps
     # @return Array of reverse geocoding results.
     def reverse_geocode(latlng, result_type=nil, location_type=nil, language=nil)
       params = {
-        "latlng" => GoogleMaps::Convert.latlng(latlng)
+        latlng: GoogleMaps::Convert.latlng(latlng)
       }
 
-      params["result_type"] = GoogleMaps::Convert.join_list("|", result_type) if result_type
-      params["location_type"] = GoogleMaps::Convert.join_list("|", location_type) if location_type
-      params["language"] = language if language
+      params[:result_type] = GoogleMaps::Convert.join_list("|", result_type) if result_type
+      params[:location_type] = GoogleMaps::Convert.join_list("|", location_type) if location_type
+      params[:language] = language if language
 
-      return get("/maps/api/geocode/json", params)["results"]
+      return get("/maps/api/geocode/json", params)[:results]
     end
 
   end

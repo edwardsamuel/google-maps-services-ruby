@@ -21,11 +21,11 @@ module GoogleMaps
       timestamp = GoogleMaps::Convert.time(timestamp || DateTime.now)
 
       params = {
-        "location": location,
-        "timestamp": timestamp
+        location: location,
+        timestamp: timestamp
       }
 
-      params["language"] = language if language
+      params[:language] = language if language
 
       return get( "/maps/api/timezone/json", params)
     end

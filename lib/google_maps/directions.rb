@@ -43,8 +43,8 @@ module GoogleMaps
         transit_routing_preference=nil)
 
       params = {
-        "origin": _convert_waypoint(origin),
-        "destination": _convert_waypoint(destination)
+        origin: _convert_waypoint(origin),
+        destination: _convert_waypoint(destination)
       }
 
       if mode
@@ -53,7 +53,7 @@ module GoogleMaps
         unless ["driving", "walking", "bicycling", "transit"].contains?(mode)
           raise ArgumentError, "Invalid travel mode."
         end
-        params["mode"] = mode
+        params[:mode] = mode
       end
 
       if waypoints
@@ -61,25 +61,25 @@ module GoogleMaps
         waypoints = waypoints.map { |waypoint| _convert_waypoint(waypoint) }
         waypoints = ["optimize:true"] + waypoints if optimize_waypoints
 
-        params["waypoints"] = GoogleMaps::Convert.join_list("|", waypoints)
+        params[:waypoints] = GoogleMaps::Convert.join_list("|", waypoints)
       end
 
-      params["alternatives"] = "true" if alternatives
-      params["avoid"] = GoogleMaps::Convert.join_list("|", avoid) if avoid
-      params["language"] = language if language
-      params["units"] = units if units
-      params["region"] = region if region
-      params["departure_time"] = GoogleMaps::Convert.time(departure_time) if departure_time
-      params["arrival_time"] = GoogleMaps::Convert.time(arrival_time) if arrival_time
+      params[:alternatives] = "true" if alternatives
+      params[:avoid] = GoogleMaps::Convert.join_list("|", avoid) if avoid
+      params[:language] = language if language
+      params[:units] = units if units
+      params[:region] = region if region
+      params[:departure_time] = GoogleMaps::Convert.time(departure_time) if departure_time
+      params[:arrival_time] = GoogleMaps::Convert.time(arrival_time) if arrival_time
 
       if departure_time and arrival_time
         raise ArgumentError, "Should not specify both departure_time and arrival_time."
       end
 
-      params["transit_mode"] = GoogleMaps::Convert.join_list("|", transit_mode) if transit_mode
-      params["transit_routing_preference"] = transit_routing_preference if transit_routing_preference
+      params[:transit_mode] = GoogleMaps::Convert.join_list("|", transit_mode) if transit_mode
+      params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
 
-      return get("/maps/api/directions/json", params)["routes"]
+      return get("/maps/api/directions/json", params)[:routes]
     end
 
     private

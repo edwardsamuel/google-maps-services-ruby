@@ -1,12 +1,11 @@
-require 'rake/testtask'
-require 'yard'
+require "bundler/gem_tasks"
+require "rspec/core/rake_task"
+require "yard"
 
-Rake::TestTask.new do |t|
-  t.libs << 'test'
-end
+RSpec::Core::RakeTask.new
 
-desc "Run tests"
-task :default => :test
+task :default => :spec
+task :test => :spec
 
 YARD::Rake::YardocTask.new do |t|
   t.files   = ['lib/**/*.rb']

@@ -8,14 +8,26 @@ module GoogleMaps
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
     RETRIABLE_STATUSES = [500, 503, 504]
 
+    include GoogleMaps::Directions
     include GoogleMaps::Geocoding
 
-    attr_reader :key, :client_id, :client_secret
+    # Secret key for accessing Google Maps Web Service.
+    # Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key
+    # @return [String]
+    attr_reader :key
+
+    # Client id for using Maps API for Work services.
+    # @return [String]
+    attr_reader :client_id
+
+    # Client secret for using Maps API for Work services.
+    # @return [String]
+    attr_reader :client_secret
 
     def initialize(options={})
       @key = options[:key] || GoogleMaps.key
       @client_id = options[:client_id] || GoogleMaps.client_id
-      @client_secret = options[:key] || GoogleMaps.client_secret
+      @client_secret = options[:client_secret] || GoogleMaps.client_secret
     end
 
     # Get the current HTTP client
@@ -35,36 +47,31 @@ module GoogleMaps
       client
     end
 
-    def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true, extract_body=nil)
+    def get(path, params, base_url=DEFAULT_BASE_URL, accepts_client_id=true, custom_response_decoder=nil)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
       response = client.get url
 
-      if (extract_body)
-        return extract_body(response)
+      if custom_response_decoder
+        return custom_response_decoder(response)
       end
-      return default_extract_body(response)
+      return decode_response_body(response)
     end
 
-    def default_extract_body(response)
-      case response.status_code
-      when 200..300
-        # Do-nothing
-      when 301, 302, 303, 307
-        message ||= sprintf('Redirect to %s', response.header[:location])
-        raise GoogleMaps::RedirectError.new(response), message
-      when 401
-        message ||= 'Unauthorized'
-        raise GoogleMaps::AuthorizationError.new(response)
-      when 304, 400, 402...500
-        message ||= 'Invalid request'
-        raise GoogleMaps::ClientError.new(response)
-      when 500..600
-        message ||= 'Server error'
-        raise GoogleMaps::ServerError.new(response)
-      else
-        message ||= 'Unknown error'
-        raise GoogleMaps::TransmissionError.new(response)
-      end
+    # Extract and parse body response as hash. Throw an error if there is something wrong with the response.
+    #
+    # @param [Hurley::Response] response Web API response.
+    #
+    # @return [Hash] Response body as hash. The hash key will be symbolized.
+    #
+    # @raise [GoogleMaps::RedirectError] The response redirects to another URL.
+    # @raise [GoogleMaps::AuthorizationError] The credential (key or client id pair) is not valid.
+    # @raise [GoogleMaps::ClientError] The request is invalid and should not be retried without modification.
+    # @raise [GoogleMaps::ServerError] An error occurred on the server and the request can be retried.
+    # @raise [GoogleMaps::TransmissionError] Unknown response status code.
+    # @raise [GoogleMaps::RateLimitError] The quota for the credential is already pass the limit.
+    # @raise [GoogleMaps::ApiError] The Web API error.
+    def decode_response_body(response)
+      check_response_status_code(response)
 
       body = MultiJson.load(response.body, :symbolize_keys => true)
 
@@ -89,6 +96,28 @@ module GoogleMaps
       end
     end
 
+    def check_response_status_code(response)
+      case response.status_code
+      when 200..300
+        # Do-nothing
+      when 301, 302, 303, 307
+        message ||= sprintf('Redirect to %s', response.header[:location])
+        raise GoogleMaps::RedirectError.new(response), message
+      when 401
+        message ||= 'Unauthorized'
+        raise GoogleMaps::AuthorizationError.new(response)
+      when 304, 400, 402...500
+        message ||= 'Invalid request'
+        raise GoogleMaps::ClientError.new(response)
+      when 500..600
+        message ||= 'Server error'
+        raise GoogleMaps::ServerError.new(response)
+      else
+        message ||= 'Unknown error'
+        raise GoogleMaps::TransmissionError.new(response)
+      end
+    end
+
     # Returns the path and query string portion of the request URL,
     # first adding any necessary parameters.
     #
@@ -109,7 +138,7 @@ module GoogleMaps
         params << ["client", @client_id]
 
         path = [path, self.class.urlencode_params(params)].join("?")
-        sig = sign_hmac(@client_secret, path)
+        sig = self.class.sign_hmac(@client_secret, path)
         return path + "&signature=" + sig
       end
 

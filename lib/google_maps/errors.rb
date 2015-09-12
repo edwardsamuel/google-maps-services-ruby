@@ -12,7 +12,7 @@ module GoogleMaps
   class RedirectError < Error
   end
 
-  # A 401 HTTP error occurred.
+  # An unathorized error occurred. It might be caused by invalid key/secret or invalid access.
   class AuthorizationError < Error
   end
 

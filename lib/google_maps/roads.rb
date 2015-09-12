@@ -1,3 +1,5 @@
+require 'multi_json'
+
 module GoogleMaps
 
   # Performs requests to the Google Maps Roads API."""
@@ -33,15 +35,15 @@ module GoogleMaps
       path = _convert_path(path)
 
       params = {
-        "path": path
+        path: path
       }
 
-      params["interpolate"] = "true" if interpolate
+      params[:interpolate] = "true" if interpolate
 
       return get("/v1/snapToRoads", params,
                  base_url=ROADS_BASE_URL,
                  accepts_clientid=false,
-                 extract_body=_roads_extract)["snappedPoints"]
+                 extract_body=extract_roads_body)[:snappedPoints]
     end
 
     # Returns the posted speed limit (in km/h) for given road segments.
@@ -55,7 +57,7 @@ module GoogleMaps
       return get("/v1/speedLimits", params,
                  base_url=ROADS_BASE_URL,
                  accepts_clientid=false,
-                 extract_body=_roads_extract)["speedLimits"]
+                 extract_body=extract_roads_body)[:speedLimits]
     end
 
 
@@ -78,13 +80,13 @@ module GoogleMaps
       path = _convert_path(path)
 
       params = {
-        "path": path
+        path: path
       }
 
       return get("/v1/speedLimits", params,
                  base_url=ROADS_BASE_URL,
-                 accepts_clientid=false,
-                 extract_body=_roads_extract)
+                 accepts_client_id=false,
+                 custom_response_decoder=extract_roads_body)
     end
 
     private
@@ -94,36 +96,38 @@ module GoogleMaps
       end
 
       # Extracts a result from a Roads API HTTP response.
-      def _roads_extract(resp)
+      def extract_roads_body(response)
+        check_response_status_code(response)
+
         begin
-          j = resp.json()
+          body = MultiJson.load(response.body, :symbolize_keys => true)
         ensure
-          unless resp.status_code == 200
-            raise googlemaps.exceptions.HTTPError(resp.status_code)
+          unless response.status_code == 200
+            raise GoogleMaps::HTTPError(response)
           end
-          raise googlemaps.exceptions.ApiError("UNKNOWN_ERROR", "Received a malformed response.")
+          raise GoogleMaps::ApiError(response), "Received a malformed response."
         end
 
-        if j.has_key?("error")
-          error = j["error"]
-          status = error["status"]
+        if body.has_key?(:error)
+          error = body[:error]
+          status = error[:status]
 
           if status == "RESOURCE_EXHAUSTED"
-            raise googlemaps.exceptions._RetriableRequest()
+            raise GoogleMaps::RetriableRequest
           end
 
-          if error.has_key?("message")
-            raise googlemaps.exceptions.ApiError(status, error["message"])
+          if error.has_key?(:message)
+            raise GoogleMaps::ApiError(response), error[:message]
           else
-            raise googlemaps.exceptions.ApiError(status)
+            raise GoogleMaps::ApiError(response)
           end
         end
 
-        unless resp.status_code == 200:
-          raise googlemaps.exceptions.HTTPError(resp.status_code)
+        unless response.status_code == 200
+          raise GoogleMaps::HTTPError(response)
         end
 
-        return j
+        return body
       end
   end
 end
