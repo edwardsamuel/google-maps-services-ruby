@@ -34,10 +34,10 @@ module GoogleMaps
     #
     # @return matrix of distances. Results are returned in rows, each row
     #     containing one origin paired with each destination.
-    def distance_matrix(origins, destinations,
-                        mode=nil, language=nil, avoid=nil, units=nil,
-                        departure_time=nil, arrival_time=nil, transit_mode=nil,
-                        transit_routing_preference=nil)
+    def distance_matrix(origins: nil, destinations: nil,
+                        mode: nil, language: nil, avoid: nil, units: nil,
+                        departure_time: nil, arrival_time: nil, transit_mode: nil,
+                        transit_routing_preference: nil)
       params = {
         origins: _convert_path(origins),
         destinations: _convert_path(destinations)
@@ -46,7 +46,7 @@ module GoogleMaps
       if mode
         # NOTE(broady): the mode parameter is not validated by the Maps API
         # server. Check here to prevent silent failures.
-        unless ["driving", "walking", "bicycling", "transit"].contains?(mode)
+        unless ["driving", "walking", "bicycling", "transit"].include?(mode)
           raise ArgumentError, "Invalid travel mode."
         end
         params[:mode] = mode
@@ -55,7 +55,7 @@ module GoogleMaps
       params[:language] = language if language
 
       if avoid
-        unless ["tolls", "highways", "ferries"].contains?(avoid)
+        unless ["tolls", "highways", "ferries"].include?(avoid)
           raise ArgumentError, "Invalid route restriction."
         end
         params[:avoid] = avoid

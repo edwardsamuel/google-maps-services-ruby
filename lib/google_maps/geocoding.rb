@@ -20,7 +20,7 @@ module GoogleMaps
     # @param [String] language The language in which to return results.
     #
     # @return Array of geocoding results.
-    def geocode(address=nil, components=nil, bounds=nil, region=nil, language=nil)
+    def geocode(address: nil, components: nil, bounds: nil, region: nil, language: nil)
       params = {}
 
       params[:address] = address if address
@@ -29,7 +29,7 @@ module GoogleMaps
       params[:region] = region if region
       params[:language] = language if language
 
-      return get("/maps/api/geocode/json", params)[:results]
+      return get('/maps/api/geocode/json', params)[:results]
     end
 
     # Reverse geocoding is the process of converting geographic coordinates into a
@@ -42,7 +42,7 @@ module GoogleMaps
     # @param [String] language The language in which to return results.
     #
     # @return Array of reverse geocoding results.
-    def reverse_geocode(latlng, result_type=nil, location_type=nil, language=nil)
+    def reverse_geocode(latlng: nil, result_type: nil, location_type: nil, language: nil)
       params = {
         latlng: GoogleMaps::Convert.latlng(latlng)
       }
@@ -51,7 +51,7 @@ module GoogleMaps
       params[:location_type] = GoogleMaps::Convert.join_list("|", location_type) if location_type
       params[:language] = language if language
 
-      return get("/maps/api/geocode/json", params)[:results]
+      return get('/maps/api/geocode/json', params)[:results]
     end
 
   end

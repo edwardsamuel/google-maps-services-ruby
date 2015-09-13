@@ -26,10 +26,9 @@ module GoogleMaps
     # :type interpolate: bool
     #
     # :rtype: A list of snapped points.
-    def snap_to_roads(path, interpolate=false)
-
-      if locations.kind_of?(Array) and locations.length == 2 and not locations[0].kind_of?(Array)
-        locations = [locations]
+    def snap_to_roads(path: nil, interpolate: false)
+      if path.kind_of?(Array) and path.length == 2 and not path[0].kind_of?(Array)
+        path = [path]
       end
 
       path = _convert_path(path)
@@ -41,9 +40,9 @@ module GoogleMaps
       params[:interpolate] = "true" if interpolate
 
       return get("/v1/snapToRoads", params,
-                 base_url=ROADS_BASE_URL,
-                 accepts_clientid=false,
-                 extract_body=extract_roads_body)[:snappedPoints]
+                 base_url: ROADS_BASE_URL,
+                 accepts_client_id: false,
+                 custom_response_decoder: method(:extract_roads_body))[:snappedPoints]
     end
 
     # Returns the posted speed limit (in km/h) for given road segments.
@@ -51,13 +50,13 @@ module GoogleMaps
     # @param [String, Array<String>] place_ids The Place ID of the road segment. Place IDs are returned
     #         by the snap_to_roads function. You can pass up to 100 Place IDs.
     # @return Array of speed limits.
-    def speed_limits(place_ids)
+    def speed_limits(place_ids: nil)
       params = GoogleMaps::Convert.as_list(place_ids).map { |place_id| ["placeId", place_id] }
 
       return get("/v1/speedLimits", params,
-                 base_url=ROADS_BASE_URL,
-                 accepts_clientid=false,
-                 extract_body=extract_roads_body)[:speedLimits]
+                 base_url: ROADS_BASE_URL,
+                 accepts_client_id: false,
+                 custom_response_decoder: method(:extract_roads_body))[:speedLimits]
     end
 
 
@@ -71,10 +70,10 @@ module GoogleMaps
     #
     # @return [Hash] a dict with both a list of speed limits and a list of the snapped
     #         points.
-    def snapped_speed_limits(path)
+    def snapped_speed_limits(path: nil)
 
-      if locations.kind_of?(Array) and locations.length == 2 and not locations[0].kind_of?(Array)
-        locations = [locations]
+      if path.kind_of?(Array) and path.length == 2 and not path[0].kind_of?(Array)
+        path = [path]
       end
 
       path = _convert_path(path)
@@ -84,9 +83,9 @@ module GoogleMaps
       }
 
       return get("/v1/speedLimits", params,
-                 base_url=ROADS_BASE_URL,
-                 accepts_client_id=false,
-                 custom_response_decoder=extract_roads_body)
+                 base_url: ROADS_BASE_URL,
+                 accepts_client_id: false,
+                 custom_response_decoder: method(:extract_roads_body))
     end
 
     private
@@ -101,11 +100,11 @@ module GoogleMaps
 
         begin
           body = MultiJson.load(response.body, :symbolize_keys => true)
-        ensure
+        rescue
           unless response.status_code == 200
-            raise GoogleMaps::HTTPError(response)
+            raise GoogleMaps::Error::HTTPError.new(response)
           end
-          raise GoogleMaps::ApiError(response), "Received a malformed response."
+          raise GoogleMaps::Error::ApiError.new(response), "Received a malformed response."
         end
 
         if body.has_key?(:error)
@@ -113,18 +112,18 @@ module GoogleMaps
           status = error[:status]
 
           if status == "RESOURCE_EXHAUSTED"
-            raise GoogleMaps::RetriableRequest
+            raise GoogleMaps::Error::RetriableRequest
           end
 
           if error.has_key?(:message)
-            raise GoogleMaps::ApiError(response), error[:message]
+            raise GoogleMaps::Error::ApiError.new(response), error[:message]
           else
-            raise GoogleMaps::ApiError(response)
+            raise GoogleMaps::Error::ApiError.new(response)
           end
         end
 
         unless response.status_code == 200
-          raise GoogleMaps::HTTPError(response)
+          raise GoogleMaps::Error::HTTPError.new(response)
         end
 
         return body

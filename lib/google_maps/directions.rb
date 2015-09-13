@@ -36,11 +36,11 @@ module GoogleMaps
     #     requests. Valid values are "less_walking" or "fewer_transfers"
     #
     # @return List of routes
-    def directions(origin, destination,
-        mode=nil, waypoints=nil, alternatives=false, avoid=nil,
-        language=nil, units=nil, region=nil, departure_time=nil,
-        arrival_time=nil, optimize_waypoints=false, transit_mode=nil,
-        transit_routing_preference=nil)
+    def directions(origin: nil, destination: nil,
+        mode: nil, waypoints: nil, alternatives: false, avoid: nil,
+        language: nil, units: nil, region: nil, departure_time: nil,
+        arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
+        transit_routing_preference: nil)
 
       params = {
         origin: _convert_waypoint(origin),
@@ -50,7 +50,7 @@ module GoogleMaps
       if mode
         # NOTE(broady): the mode parameter is not validated by the Maps API
         # server. Check here to prevent silent failures.
-        unless ["driving", "walking", "bicycling", "transit"].contains?(mode)
+        unless ["driving", "walking", "bicycling", "transit"].include?(mode)
           raise ArgumentError, "Invalid travel mode."
         end
         params[:mode] = mode

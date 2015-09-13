@@ -12,6 +12,10 @@ module GoogleMaps
   require 'google_maps/errors'
   require 'google_maps/convert'
   require 'google_maps/directions'
+  require 'google_maps/distance_matrix'
+  require 'google_maps/elevation'
   require 'google_maps/geocoding'
+  require 'google_maps/roads'
+  require 'google_maps/time_zone'
   require 'google_maps/client'
 end

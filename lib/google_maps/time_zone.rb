@@ -1,6 +1,8 @@
+require 'date'
+
 module GoogleMaps
 
-  # Performs requests to the Google Maps Directions API."""
+  # Performs requests to the Google Maps TimeZone API."""
   module TimeZone
 
     # Get time zone for a location on the earth, as well as that location's
@@ -12,13 +14,14 @@ module GoogleMaps
     #     midnight, January 1, 1970 UTC. The Time Zone API uses the timestamp to
     #     determine whether or not Daylight Savings should be applied. Times
     #     before 1970 can be expressed as negative values. Optional. Defaults to
-    #     ``datetime.now()``.
+    #     ``Time.now``.
     # @param [String] language The language in which to return results.
     #
     # @return [Hash]
-    def timezone(location, timestamp=nil, language=nil)
+    def timezone(location: nil,
+                 timestamp: nil, language: nil)
       location = GoogleMaps::Convert.latlng(location)
-      timestamp = GoogleMaps::Convert.time(timestamp || DateTime.now)
+      timestamp = GoogleMaps::Convert.time(timestamp || Time.now)
 
       params = {
         location: location,

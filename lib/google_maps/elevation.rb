@@ -11,8 +11,8 @@ module GoogleMaps
     #         latitude/longitude hash from which you wish to calculate
     #         elevation data.
     #
-    # @return list of elevation data responses
-    def elevation(locations)
+    # @return [Array] Array of elevation data responses
+    def elevation(locations: nil)
       params = {}
       if locations.kind_of?(Array) and locations.length == 2 and not locations[0].kind_of?(Array)
         locations = [locations]
@@ -32,8 +32,8 @@ module GoogleMaps
     # @param [Integer] samples The number of sample points along a path for which to
     #         return elevation data.
     #
-    # @return Array of elevation data responses
-    def elevation_along_path(path, samples)
+    # @return [Array] Array of elevation data responses
+    def elevation_along_path(path: nil, samples: nil)
       if path.kind_of?(String)
         path = "enc:%s" % path
       else

@@ -49,8 +49,8 @@ EOF
         .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: json)
     end
 
-    it 'should raise GoogleMaps::AuthorizationError' do
-      expect { client.directions("Sydney", "Melbourne") }.to raise_error GoogleMaps::AuthorizationError
+    it 'should raise GoogleMaps::Error::RequestDeniedError' do
+      expect { client.directions(origin: "Sydney", destination: "Melbourne") }.to raise_error GoogleMaps::Error::RequestDeniedError
     end
   end
 
@@ -65,7 +65,7 @@ EOF
     end
 
     it 'should be signed' do
-      client.geocode('Sesame St.')
+      client.geocode(address: 'Sesame St.')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?address=Sesame+St.&client=foo&signature=fxbWUIcNPZSekVOhp2ul9LW5TpY=')).to have_been_made
     end
   end

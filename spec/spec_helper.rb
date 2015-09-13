@@ -29,7 +29,11 @@ require 'webmock/rspec'
 require 'google_maps'
 
 RSpec.shared_context 'HTTP client' do
+  let(:api_key) do
+    'AIZa1234567890'
+  end
+
   let(:client) do
-    client = GoogleMaps::Client.new(key: 'AIZa1234567890')
+    client = GoogleMaps::Client.new(key: api_key)
   end
 end

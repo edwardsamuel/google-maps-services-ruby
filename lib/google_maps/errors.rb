@@ -1,34 +1,40 @@
 module GoogleMaps
-  # Base error, capable of wrapping another
-  class Error < StandardError
-    attr_reader :response
+  module Error
+    # Base error, capable of wrapping another
+    class BaseError < StandardError
+      attr_reader :response
 
-    def initialize(response)
-      @response = response
+      def initialize(response)
+        @response = response
+      end
     end
-  end
 
-  # An exception that is raised if a redirect is required
-  class RedirectError < Error
-  end
+    # An exception that is raised if a redirect is required
+    class RedirectError < BaseError
+    end
 
-  # An unathorized error occurred. It might be caused by invalid key/secret or invalid access.
-  class AuthorizationError < Error
-  end
+    # A 4xx class HTTP error occurred.
+    class ClientError < BaseError
+    end
 
-  # A 4xx class HTTP error occurred.
-  class ClientError < Error
-  end
+    # A 5xx class HTTP error occurred.
+    class ServerError < BaseError
+    end
 
-  # A 4xx class HTTP error occurred.
-  class RateLimitError < Error
-  end
+    # An API error occured.
+    class ApiError < BaseError
+    end
 
-  # A 5xx class HTTP error occurred.
-  class ServerError < Error
-  end
+    # Requiered query is missing
+    class InvalidRequestError < ApiError
+    end
 
-  # An API error occured.
-  class ApiError < Error
+    # Over quota.
+    class RateLimitError < ApiError
+    end
+
+    # An unathorized error occurred. It might be caused by invalid key/secret or invalid access.
+    class RequestDeniedError < ApiError
+    end
   end
 end
