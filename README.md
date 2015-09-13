@@ -129,4 +129,4 @@ For more usage examples, check out [the tests](spec/).
 [Time Zone API]: https://developers.google.com/maps/documentation/timezone/
 [Roads API]: https://developers.google.com/maps/documentation/roads/
 
-[issues]: https://github.com/googlemaps/google-maps-services-python/issues
+[issues]: https://github.com/edwardsamuel/google-maps-services-ruby/issues
