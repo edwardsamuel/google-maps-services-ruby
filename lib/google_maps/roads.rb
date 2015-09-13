@@ -96,13 +96,11 @@ module GoogleMaps
 
       # Extracts a result from a Roads API HTTP response.
       def extract_roads_body(response)
-        check_response_status_code(response)
-
         begin
           body = MultiJson.load(response.body, :symbolize_keys => true)
         rescue
           unless response.status_code == 200
-            raise GoogleMaps::Error::HTTPError.new(response)
+            check_response_status_code(response)
           end
           raise GoogleMaps::Error::ApiError.new(response), "Received a malformed response."
         end
@@ -111,8 +109,19 @@ module GoogleMaps
           error = body[:error]
           status = error[:status]
 
-          if status == "RESOURCE_EXHAUSTED"
-            raise GoogleMaps::Error::RetriableRequest
+          if status == 'INVALID_ARGUMENT'
+            if error[:message] == 'The provided API key is invalid.'
+              raise GoogleMaps::Error::RequestDeniedError.new(response), error[:message]
+            end
+            raise GoogleMaps::Error::InvalidRequestError.new(response), error[:message]
+          end
+
+          if status == 'PERMISSION_DENIED'
+            raise GoogleMaps::Error::RequestDeniedError.new(response), error[:message]
+          end
+
+          if status == 'RESOURCE_EXHAUSTED'
+            raise GoogleMaps::Error::RateLimitError.new(response), error[:message]
           end
 
           if error.has_key?(:message)
