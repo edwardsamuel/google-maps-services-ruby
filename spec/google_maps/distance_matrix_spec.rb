@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMaps::DistanceMatrix do
+describe GoogleMapsService::DistanceMatrix do
   include_context 'HTTP client'
 
   before(:example) do

@@ -1,4 +1,4 @@
-module GoogleMaps
+module GoogleMapsService
 
   # Performs requests to the Google Maps Elevation API.
   module Elevation
@@ -50,8 +50,8 @@ module GoogleMaps
 
     private
       def _convert_locations(locations)
-        locations = GoogleMaps::Convert.as_list(locations)
-        return GoogleMaps::Convert.join_list("|", locations.map { |k| k.kind_of?(String) ? k : GoogleMaps::Convert.latlng(k) })
+        locations = GoogleMapsService::Convert.as_list(locations)
+        return GoogleMapsService::Convert.join_list("|", locations.map { |k| k.kind_of?(String) ? k : GoogleMapsService::Convert.latlng(k) })
       end
   end
 end

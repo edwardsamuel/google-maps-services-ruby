@@ -1,4 +1,4 @@
-module GoogleMaps
+module GoogleMapsService
 
   # Performs requests to the Google Maps Distance Matrix API.
   module DistanceMatrix
@@ -78,8 +78,8 @@ module GoogleMaps
 
     private
       def _convert_path(waypoints)
-        waypoints = GoogleMaps::Convert.as_list(waypoints)
-        return GoogleMaps::Convert.join_list("|", waypoints.map { |k| k.kind_of?(String) ? k : GoogleMaps::Convert.latlng(k) })
+        waypoints = GoogleMapsService::Convert.as_list(waypoints)
+        return GoogleMapsService::Convert.join_list("|", waypoints.map { |k| k.kind_of?(String) ? k : GoogleMapsService::Convert.latlng(k) })
       end
   end
 end

@@ -1,22 +1,22 @@
 require 'spec_helper'
 require 'date'
 
-describe GoogleMaps::Convert do
+describe GoogleMapsService::Convert do
   describe '.latlng' do
     context 'with a lat/lng pair' do
       it 'should return comma-separated string' do
-        expect(GoogleMaps::Convert.latlng({lat: 1, lng: 2})).to eq("1.000000,2.000000")
-        expect(GoogleMaps::Convert.latlng({latitude: 1, longitude: 2})).to eq("1.000000,2.000000")
-        expect(GoogleMaps::Convert.latlng({"lat" => 1, "lng" => 2})).to eq("1.000000,2.000000")
-        expect(GoogleMaps::Convert.latlng({"latitude" => 1, "longitude" => 2})).to eq("1.000000,2.000000")
-        expect(GoogleMaps::Convert.latlng([1, 2])).to eq("1.000000,2.000000")
+        expect(GoogleMapsService::Convert.latlng({lat: 1, lng: 2})).to eq("1.000000,2.000000")
+        expect(GoogleMapsService::Convert.latlng({latitude: 1, longitude: 2})).to eq("1.000000,2.000000")
+        expect(GoogleMapsService::Convert.latlng({"lat" => 1, "lng" => 2})).to eq("1.000000,2.000000")
+        expect(GoogleMapsService::Convert.latlng({"latitude" => 1, "longitude" => 2})).to eq("1.000000,2.000000")
+        expect(GoogleMapsService::Convert.latlng([1, 2])).to eq("1.000000,2.000000")
       end
     end
 
     context 'without a lat/lng pair' do
       it 'should raise ArgumentError' do
-        expect { GoogleMaps::Convert.latlng(1) }.to raise_error ArgumentError
-        expect { GoogleMaps::Convert.latlng("test") }.to raise_error ArgumentError
+        expect { GoogleMapsService::Convert.latlng(1) }.to raise_error ArgumentError
+        expect { GoogleMapsService::Convert.latlng("test") }.to raise_error ArgumentError
       end
     end
   end
@@ -24,19 +24,19 @@ describe GoogleMaps::Convert do
   context '.join_list' do
     context 'with a single value array' do
       it 'should return its value' do
-        expect(GoogleMaps::Convert.join_list("|", "asdf")).to eq("asdf")
+        expect(GoogleMapsService::Convert.join_list("|", "asdf")).to eq("asdf")
       end
     end
 
     context 'with a multiple values array' do
       it 'should return separated value string' do
-        expect(GoogleMaps::Convert.join_list(",", ["1", "2", "A"])).to eq("1,2,A")
+        expect(GoogleMapsService::Convert.join_list(",", ["1", "2", "A"])).to eq("1,2,A")
       end
     end
 
     context 'with an empty array' do
       it 'should return empty string' do
-        expect(GoogleMaps::Convert.join_list(",", [])).to eq("")
+        expect(GoogleMapsService::Convert.join_list(",", [])).to eq("")
       end
     end
   end
@@ -44,17 +44,17 @@ describe GoogleMaps::Convert do
   context '.as_list' do
     context 'with a single value' do
       it 'should return an array contains the value' do
-        expect(GoogleMaps::Convert.as_list(1)).to eq([1])
-        expect(GoogleMaps::Convert.as_list("string")).to eq(["string"])
+        expect(GoogleMapsService::Convert.as_list(1)).to eq([1])
+        expect(GoogleMapsService::Convert.as_list("string")).to eq(["string"])
 
         a_hash = {"a": 1}
-        expect(GoogleMaps::Convert.as_list(a_hash)).to eq([a_hash])
+        expect(GoogleMapsService::Convert.as_list(a_hash)).to eq([a_hash])
       end
     end
 
     context 'with an array' do
       it 'should return the same array' do
-        expect(GoogleMaps::Convert.as_list([1, 2, 3])).to eq([1, 2, 3])
+        expect(GoogleMapsService::Convert.as_list([1, 2, 3])).to eq([1, 2, 3])
       end
     end
   end
@@ -63,21 +63,21 @@ describe GoogleMaps::Convert do
   context '.time' do
     context 'with an integer' do
       it 'should return the integer as string' do
-        expect(GoogleMaps::Convert.time(1409810596)).to eq("1409810596")
+        expect(GoogleMapsService::Convert.time(1409810596)).to eq("1409810596")
       end
     end
 
     context 'with a Time' do
       it 'should return the epoch time as string' do
         t = Time.at(1409810596)
-        expect(GoogleMaps::Convert.time(t)).to eq("1409810596")
+        expect(GoogleMapsService::Convert.time(t)).to eq("1409810596")
       end
     end
 
     context 'with a DateTime' do
       it 'should return the epoch time as string' do
         dt = Time.at(1409810596).to_datetime
-        expect(GoogleMaps::Convert.time(dt)).to eq("1409810596")
+        expect(GoogleMapsService::Convert.time(dt)).to eq("1409810596")
       end
     end
   end
@@ -87,21 +87,21 @@ describe GoogleMaps::Convert do
     context 'with single hash entry' do
       it 'should return key:value pair string' do
         c = {"country": "US"}
-        expect(GoogleMaps::Convert.components(c)).to eq("country:US")
+        expect(GoogleMapsService::Convert.components(c)).to eq("country:US")
       end
     end
 
     context 'with multiple hash entries' do
       it 'should return key:value pairs separated by "|"' do
         c = {"country": "US", "foo": 1}
-        expect(GoogleMaps::Convert.components(c)).to eq("country:US|foo:1")
+        expect(GoogleMapsService::Convert.components(c)).to eq("country:US|foo:1")
       end
     end
 
     context 'with non-hash' do
       it 'should raise ArgumentError' do
-        expect { GoogleMaps::Convert.components("test") }.to raise_error ArgumentError
-        expect { GoogleMaps::Convert.components(1) }.to raise_error ArgumentError
+        expect { GoogleMapsService::Convert.components("test") }.to raise_error ArgumentError
+        expect { GoogleMapsService::Convert.components(1) }.to raise_error ArgumentError
       end
     end
   end
@@ -113,15 +113,15 @@ describe GoogleMaps::Convert do
         ne = {"lat": 1, "lng": 2}
         sw = [3, 4]
         b = {northeast: ne, southwest: sw}
-        expect(GoogleMaps::Convert.bounds(b)).to eq("3.000000,4.000000|1.000000,2.000000")
+        expect(GoogleMapsService::Convert.bounds(b)).to eq("3.000000,4.000000|1.000000,2.000000")
         b = {"northeast" => ne, "southwest" => sw}
-        expect(GoogleMaps::Convert.bounds(b)).to eq("3.000000,4.000000|1.000000,2.000000")
+        expect(GoogleMapsService::Convert.bounds(b)).to eq("3.000000,4.000000|1.000000,2.000000")
       end
     end
 
     context 'with string' do
       it 'should raise ArgumentError' do
-        expect { GoogleMaps::Convert.bounds("test") }.to raise_error ArgumentError
+        expect { GoogleMapsService::Convert.bounds("test") }.to raise_error ArgumentError
       end
     end
   end
@@ -154,7 +154,7 @@ describe GoogleMaps::Convert do
                          "vuFlhB|sN`_@fvBp`CxhCt_@loDsS|eDlmChgFlqCbjCxk@vbGxm" \
                          "CjbMba@rpBaoClcCk_DhgEzYdzBl\\vsA_JfGztAbShkGtEhlDzh" \
                          "C~w@hnB{e@yF}`D`_Ayx@~vGqn@l}CafC")
-        GoogleMaps::Convert.decode_polyline(syd_mel_route)
+        GoogleMapsService::Convert.decode_polyline(syd_mel_route)
       end
 
       it 'should start in Sydney' do
@@ -174,8 +174,8 @@ describe GoogleMaps::Convert do
       it 'should be same as original polyline' do
         test_polyline = ("gcneIpgxzRcDnBoBlEHzKjBbHlG`@`IkDxIi" \
                          "KhKoMaLwTwHeIqHuAyGXeB~Ew@fFjAtIzExF")
-        points = GoogleMaps::Convert.decode_polyline(test_polyline)
-        actual_polyline = GoogleMaps::Convert.encode_polyline(points)
+        points = GoogleMapsService::Convert.decode_polyline(test_polyline)
+        actual_polyline = GoogleMapsService::Convert.encode_polyline(points)
         expect(actual_polyline).to eq (test_polyline)
       end
     end

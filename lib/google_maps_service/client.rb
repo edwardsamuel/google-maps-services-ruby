@@ -2,18 +2,18 @@ require 'uri'
 require 'hurley'
 require 'multi_json'
 
-module GoogleMaps
+module GoogleMapsService
   class Client
-    USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMaps::VERSION}"
+    USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsService::VERSION}"
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
     RETRIABLE_STATUSES = [500, 503, 504]
 
-    include GoogleMaps::Directions
-    include GoogleMaps::DistanceMatrix
-    include GoogleMaps::Elevation
-    include GoogleMaps::Geocoding
-    include GoogleMaps::Roads
-    include GoogleMaps::TimeZone
+    include GoogleMapsService::Directions
+    include GoogleMapsService::DistanceMatrix
+    include GoogleMapsService::Elevation
+    include GoogleMapsService::Geocoding
+    include GoogleMapsService::Roads
+    include GoogleMapsService::TimeZone
 
     # Secret key for accessing Google Maps Web Service.
     # Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key
@@ -29,9 +29,9 @@ module GoogleMaps
     attr_reader :client_secret
 
     def initialize(options={})
-      @key = options[:key] || GoogleMaps.key
-      @client_id = options[:client_id] || GoogleMaps.client_id
-      @client_secret = options[:client_secret] || GoogleMaps.client_secret
+      @key = options[:key] || GoogleMapsService.key
+      @client_id = options[:client_id] || GoogleMapsService.client_id
+      @client_secret = options[:client_secret] || GoogleMapsService.client_secret
     end
 
     # Get the current HTTP client
@@ -67,13 +67,13 @@ module GoogleMaps
     #
     # @return [Hash] Response body as hash. The hash key will be symbolized.
     #
-    # @raise [GoogleMaps::Error::RedirectError] The response redirects to another URL.
-    # @raise [GoogleMaps::Error::RequestDeniedError] The credential (key or client id pair) is not valid.
-    # @raise [GoogleMaps::Error::ClientError] The request is invalid and should not be retried without modification.
-    # @raise [GoogleMaps::Error::ServerError] An error occurred on the server and the request can be retried.
-    # @raise [GoogleMaps::Error::TransmissionError] Unknown response status code.
-    # @raise [GoogleMaps::Error::RateLimitError] The quota for the credential is already pass the limit.
-    # @raise [GoogleMaps::Error::ApiError] The Web API error.
+    # @raise [GoogleMapsService::Error::RedirectError] The response redirects to another URL.
+    # @raise [GoogleMapsService::Error::RequestDeniedError] The credential (key or client id pair) is not valid.
+    # @raise [GoogleMapsService::Error::ClientError] The request is invalid and should not be retried without modification.
+    # @raise [GoogleMapsService::Error::ServerError] An error occurred on the server and the request can be retried.
+    # @raise [GoogleMapsService::Error::TransmissionError] Unknown response status code.
+    # @raise [GoogleMapsService::Error::RateLimitError] The quota for the credential is already pass the limit.
+    # @raise [GoogleMapsService::Error::ApiError] The Web API error.
     def decode_response_body(response)
       check_response_status_code(response)
 
@@ -85,21 +85,21 @@ module GoogleMaps
       end
 
       if api_status == "OVER_QUERY_LIMIT"
-        raise GoogleMaps::Error::RateLimitError.new(response), body[:error_message]
+        raise GoogleMapsService::Error::RateLimitError.new(response), body[:error_message]
       end
 
       if api_status == "REQUEST_DENIED"
-        raise GoogleMaps::Error::RequestDeniedError.new(response), body[:error_message]
+        raise GoogleMapsService::Error::RequestDeniedError.new(response), body[:error_message]
       end
 
       if api_status == "INVALID_REQUEST"
-        raise GoogleMaps::Error::InvalidRequestError.new(response), body[:error_message]
+        raise GoogleMapsService::Error::InvalidRequestError.new(response), body[:error_message]
       end
 
       if body[:error_message]
-        raise GoogleMaps::Error::ApiError.new(response), body[:error_message]
+        raise GoogleMapsService::Error::ApiError.new(response), body[:error_message]
       else
-        raise GoogleMaps::Error::ApiError.new(response)
+        raise GoogleMapsService::Error::ApiError.new(response)
       end
     end
 
@@ -109,19 +109,19 @@ module GoogleMaps
         # Do-nothing
       when 301, 302, 303, 307
         message ||= sprintf('Redirect to %s', response.header[:location])
-        raise GoogleMaps::Error::RedirectError.new(response), message
+        raise GoogleMapsService::Error::RedirectError.new(response), message
       when 401
         message ||= 'Unauthorized'
-        raise GoogleMaps::Error::ClientError.new(response)
+        raise GoogleMapsService::Error::ClientError.new(response)
       when 304, 400, 402...500
         message ||= 'Invalid request'
-        raise GoogleMaps::Error::ClientError.new(response)
+        raise GoogleMapsService::Error::ClientError.new(response)
       when 500..600
         message ||= 'Server error'
-        raise GoogleMaps::Error::ServerError.new(response)
+        raise GoogleMapsService::Error::ServerError.new(response)
       else
         message ||= 'Unknown error'
-        raise GoogleMaps::Error::TransmissionError.new(response)
+        raise GoogleMapsService::Error::TransmissionError.new(response)
       end
     end
 

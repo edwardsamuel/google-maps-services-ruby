@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMaps::Geocoding do
+describe GoogleMapsService::Geocoding do
   include_context 'HTTP client'
 
   before(:example) do

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMaps::Elevation do
+describe GoogleMapsService::Elevation do
   include_context 'HTTP client'
 
   before(:example) do
@@ -37,7 +37,7 @@ describe GoogleMaps::Elevation do
     end
 
     it 'should raise InvalidRequestError' do
-      expect { client.elevation_along_path(path: [[40.714728, -73.998672]], samples: 5) }.to raise_error GoogleMaps::Error::InvalidRequestError
+      expect { client.elevation_along_path(path: [[40.714728, -73.998672]], samples: 5) }.to raise_error GoogleMapsService::Error::InvalidRequestError
     end
   end
 

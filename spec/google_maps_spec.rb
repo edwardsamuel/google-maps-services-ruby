@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe GoogleMaps do
+describe GoogleMapsService do
   it 'has a version number' do
-    expect(GoogleMaps::VERSION).not_to be nil
+    expect(GoogleMapsService::VERSION).not_to be nil
   end
 end

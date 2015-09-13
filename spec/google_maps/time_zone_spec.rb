@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMaps::TimeZone do
+describe GoogleMapsService::TimeZone do
   include_context 'HTTP client'
 
   before(:example) do

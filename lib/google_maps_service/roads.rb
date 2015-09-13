@@ -1,6 +1,6 @@
 require 'multi_json'
 
-module GoogleMaps
+module GoogleMapsService
 
   # Performs requests to the Google Maps Roads API."""
   module Roads
@@ -51,7 +51,7 @@ module GoogleMaps
     #         by the snap_to_roads function. You can pass up to 100 Place IDs.
     # @return Array of speed limits.
     def speed_limits(place_ids: nil)
-      params = GoogleMaps::Convert.as_list(place_ids).map { |place_id| ["placeId", place_id] }
+      params = GoogleMapsService::Convert.as_list(place_ids).map { |place_id| ["placeId", place_id] }
 
       return get("/v1/speedLimits", params,
                  base_url: ROADS_BASE_URL,
@@ -90,8 +90,8 @@ module GoogleMaps
 
     private
       def _convert_path(paths)
-        paths = GoogleMaps::Convert.as_list(paths)
-        return GoogleMaps::Convert.join_list("|", paths.map { |k| k.kind_of?(String) ? k : GoogleMaps::Convert.latlng(k) })
+        paths = GoogleMapsService::Convert.as_list(paths)
+        return GoogleMapsService::Convert.join_list("|", paths.map { |k| k.kind_of?(String) ? k : GoogleMapsService::Convert.latlng(k) })
       end
 
       # Extracts a result from a Roads API HTTP response.
@@ -102,7 +102,7 @@ module GoogleMaps
           unless response.status_code == 200
             check_response_status_code(response)
           end
-          raise GoogleMaps::Error::ApiError.new(response), "Received a malformed response."
+          raise GoogleMapsService::Error::ApiError.new(response), "Received a malformed response."
         end
 
         if body.has_key?(:error)
@@ -111,28 +111,28 @@ module GoogleMaps
 
           if status == 'INVALID_ARGUMENT'
             if error[:message] == 'The provided API key is invalid.'
-              raise GoogleMaps::Error::RequestDeniedError.new(response), error[:message]
+              raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
             end
-            raise GoogleMaps::Error::InvalidRequestError.new(response), error[:message]
+            raise GoogleMapsService::Error::InvalidRequestError.new(response), error[:message]
           end
 
           if status == 'PERMISSION_DENIED'
-            raise GoogleMaps::Error::RequestDeniedError.new(response), error[:message]
+            raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
           end
 
           if status == 'RESOURCE_EXHAUSTED'
-            raise GoogleMaps::Error::RateLimitError.new(response), error[:message]
+            raise GoogleMapsService::Error::RateLimitError.new(response), error[:message]
           end
 
           if error.has_key?(:message)
-            raise GoogleMaps::Error::ApiError.new(response), error[:message]
+            raise GoogleMapsService::Error::ApiError.new(response), error[:message]
           else
-            raise GoogleMaps::Error::ApiError.new(response)
+            raise GoogleMapsService::Error::ApiError.new(response)
           end
         end
 
         unless response.status_code == 200
-          raise GoogleMaps::Error::HTTPError.new(response)
+          raise GoogleMapsService::Error::HTTPError.new(response)
         end
 
         return body

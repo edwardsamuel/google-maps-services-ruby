@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMaps::Roads do
+describe GoogleMapsService::Roads do
   include_context 'HTTP client'
 
   context '#snap_to_roads' do
@@ -54,7 +54,7 @@ describe GoogleMaps::Roads do
 
   context 'with client_id and client_secret' do
     let(:client) do
-      GoogleMaps::Client.new(client_id: 'asdf', client_secret: 'asdf')
+      GoogleMapsService::Client.new(client_id: 'asdf', client_secret: 'asdf')
     end
 
     it 'should raise ArgumentError' do

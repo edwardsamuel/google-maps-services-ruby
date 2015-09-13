@@ -1,4 +1,4 @@
-module GoogleMaps
+module GoogleMapsService
   module Error
     # Base error, capable of wrapping another
     class BaseError < StandardError

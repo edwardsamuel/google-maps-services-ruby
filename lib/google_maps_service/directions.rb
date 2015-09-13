@@ -1,4 +1,4 @@
-module GoogleMaps
+module GoogleMapsService
 
   # Performs requests to the Google Maps Directions API.
   module Directions
@@ -57,26 +57,26 @@ module GoogleMaps
       end
 
       if waypoints
-        waypoints = GoogleMaps::Convert.as_list(waypoints)
+        waypoints = GoogleMapsService::Convert.as_list(waypoints)
         waypoints = waypoints.map { |waypoint| _convert_waypoint(waypoint) }
         waypoints = ["optimize:true"] + waypoints if optimize_waypoints
 
-        params[:waypoints] = GoogleMaps::Convert.join_list("|", waypoints)
+        params[:waypoints] = GoogleMapsService::Convert.join_list("|", waypoints)
       end
 
       params[:alternatives] = "true" if alternatives
-      params[:avoid] = GoogleMaps::Convert.join_list("|", avoid) if avoid
+      params[:avoid] = GoogleMapsService::Convert.join_list("|", avoid) if avoid
       params[:language] = language if language
       params[:units] = units if units
       params[:region] = region if region
-      params[:departure_time] = GoogleMaps::Convert.time(departure_time) if departure_time
-      params[:arrival_time] = GoogleMaps::Convert.time(arrival_time) if arrival_time
+      params[:departure_time] = GoogleMapsService::Convert.time(departure_time) if departure_time
+      params[:arrival_time] = GoogleMapsService::Convert.time(arrival_time) if arrival_time
 
       if departure_time and arrival_time
         raise ArgumentError, "Should not specify both departure_time and arrival_time."
       end
 
-      params[:transit_mode] = GoogleMaps::Convert.join_list("|", transit_mode) if transit_mode
+      params[:transit_mode] = GoogleMapsService::Convert.join_list("|", transit_mode) if transit_mode
       params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
 
       return get("/maps/api/directions/json", params)[:routes]
@@ -87,7 +87,7 @@ module GoogleMaps
         if waypoint.kind_of?(String)
           return waypoint
         end
-        return GoogleMaps::Convert.latlng(waypoint)
+        return GoogleMapsService::Convert.latlng(waypoint)
       end
   end
 end
