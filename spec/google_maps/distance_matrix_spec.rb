@@ -29,7 +29,7 @@ describe GoogleMapsService::DistanceMatrix do
     it 'should call Google Maps Web Service' do
       origins = ["Bobcaygeon ON", [41.43206, -81.38992]]
       destinations = [[43.012486, -83.6964149],
-                      {"lat": 42.8863855, "lng": -78.8781627}]
+                      {lat: 42.8863855, lng: -78.8781627}]
 
       matrix = client.distance_matrix(origins: origins, destinations: destinations)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/distancematrix/json?key=%s&origins=Bobcaygeon+ON%%7C41.432060%%2C-81.389920&destinations=43.012486%%2C-83.696415%%7C42.886386%%2C-78.878163' % api_key)).to have_been_made
