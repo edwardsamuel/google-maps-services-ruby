@@ -47,7 +47,7 @@ describe GoogleMapsService::Convert do
         expect(GoogleMapsService::Convert.as_list(1)).to eq([1])
         expect(GoogleMapsService::Convert.as_list("string")).to eq(["string"])
 
-        a_hash = {"a": 1}
+        a_hash = {a: 1}
         expect(GoogleMapsService::Convert.as_list(a_hash)).to eq([a_hash])
       end
     end
@@ -86,14 +86,14 @@ describe GoogleMapsService::Convert do
   context '.components' do
     context 'with single hash entry' do
       it 'should return key:value pair string' do
-        c = {"country": "US"}
+        c = {country: "US"}
         expect(GoogleMapsService::Convert.components(c)).to eq("country:US")
       end
     end
 
     context 'with multiple hash entries' do
       it 'should return key:value pairs separated by "|"' do
-        c = {"country": "US", "foo": 1}
+        c = {country: "US", foo: 1}
         expect(GoogleMapsService::Convert.components(c)).to eq("country:US|foo:1")
       end
     end
@@ -110,7 +110,7 @@ describe GoogleMapsService::Convert do
   context '.bounds' do
     context 'with northeast and southwest hash' do
       it 'should return string representation of bounds' do
-        ne = {"lat": 1, "lng": 2}
+        ne = {lat: 1, lng: 2}
         sw = [3, 4]
         b = {northeast: ne, southwest: sw}
         expect(GoogleMapsService::Convert.bounds(b)).to eq("3.000000,4.000000|1.000000,2.000000")
