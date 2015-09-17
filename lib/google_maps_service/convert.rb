@@ -31,18 +31,9 @@ module GoogleMapsService
     # @return [Array] Pair of lat and lng array.
     def normalize_latlng(arg)
       if arg.kind_of?(Hash)
-          if arg.has_key?(:lat) and arg.has_key?(:lng)
-              return arg[:lat], arg[:lng]
-          end
-          if arg.has_key?(:latitude) and arg.has_key?(:longitude)
-              return arg[:latitude], arg[:longitude]
-          end
-          if arg.has_key?("lat") and arg.has_key?("lng")
-              return arg["lat"], arg["lng"]
-          end
-          if arg.has_key?("latitude") and arg.has_key?("longitude")
-              return arg["latitude"], arg["longitude"]
-          end
+        lat = arg[:lat] || arg[:latitude] || arg["lat"] || arg["latitude"]
+        lng = arg[:lng] || arg[:longitude] || arg["lng"] || arg["longitude"]
+        return lat, lng
       elsif arg.kind_of?(Array)
         return arg[0], arg[1]
       end
