@@ -106,7 +106,6 @@ describe GoogleMapsService::Convert do
     end
   end
 
-
   context '.bounds' do
     context 'with northeast and southwest hash' do
       it 'should return string representation of bounds' do
@@ -122,6 +121,43 @@ describe GoogleMapsService::Convert do
     context 'with string' do
       it 'should raise ArgumentError' do
         expect { GoogleMapsService::Convert.bounds("test") }.to raise_error ArgumentError
+      end
+    end
+  end
+
+  context '.waypoints' do
+    context 'with string' do
+      it 'should return string representation of waypoints' do
+        places = 'ABC'
+        expect(GoogleMapsService::Convert.waypoints(places)).to eq('ABC')
+      end
+    end
+
+    context 'with lat/lon pairs' do
+      it 'should return string representation of waypoints' do
+        path = {"latitude" => 1, "longitude" => 2}
+        expect(GoogleMapsService::Convert.waypoints(path)).to eq('1.000000,2.000000')
+      end
+    end
+
+    context 'with array of string' do
+      it 'should return string representation of waypoints' do
+        places = ['ABC', 'def']
+        expect(GoogleMapsService::Convert.waypoints(places)).to eq('ABC|def')
+      end
+    end
+
+    context 'with array of lat/lon pairs' do
+      it 'should return string representation of waypoints' do
+        path = [[1, 2], {lat: 3, lng: 4}]
+        expect(GoogleMapsService::Convert.waypoints(path)).to eq('1.000000,2.000000|3.000000,4.000000')
+      end
+    end
+
+    context 'with mixed array' do
+      it 'should return string representation of waypoints' do
+        path = [[1, 2], 'ABC', {lat: 3, lng: 4}, 'def']
+        expect(GoogleMapsService::Convert.waypoints(path)).to eq('1.000000,2.000000|ABC|3.000000,4.000000|def')
       end
     end
   end

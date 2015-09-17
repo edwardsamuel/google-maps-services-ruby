@@ -27,11 +27,7 @@ module GoogleMapsService
     #
     # :rtype: A list of snapped points.
     def snap_to_roads(path: nil, interpolate: false)
-      if path.kind_of?(Array) and path.length == 2 and not path[0].kind_of?(Array)
-        path = [path]
-      end
-
-      path = _convert_path(path)
+      path = GoogleMapsService::Convert.waypoints(path)
 
       params = {
         path: path
@@ -71,12 +67,7 @@ module GoogleMapsService
     # @return [Hash] a dict with both a list of speed limits and a list of the snapped
     #         points.
     def snapped_speed_limits(path: nil)
-
-      if path.kind_of?(Array) and path.length == 2 and not path[0].kind_of?(Array)
-        path = [path]
-      end
-
-      path = _convert_path(path)
+      path = GoogleMapsService::Convert.waypoints(path)
 
       params = {
         path: path
@@ -89,11 +80,6 @@ module GoogleMapsService
     end
 
     private
-      def _convert_path(paths)
-        paths = GoogleMapsService::Convert.as_list(paths)
-        return GoogleMapsService::Convert.join_list("|", paths.map { |k| k.kind_of?(String) ? k : GoogleMapsService::Convert.latlng(k) })
-      end
-
       # Extracts a result from a Roads API HTTP response.
       def extract_roads_body(response)
         begin
@@ -132,7 +118,7 @@ module GoogleMapsService
         end
 
         unless response.status_code == 200
-          raise GoogleMapsService::Error::HTTPError.new(response)
+          raise GoogleMapsService::Error::ApiError.new(response)
         end
 
         return body

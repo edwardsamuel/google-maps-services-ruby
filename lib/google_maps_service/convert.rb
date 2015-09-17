@@ -128,14 +128,32 @@ module GoogleMapsService
     # @return [String]
     def bounds(arg)
       if arg.kind_of?(Hash)
-        if arg.has_key?("southwest") && arg.has_key?("northeast")
-          return "#{latlng(arg["southwest"])}|#{latlng(arg["northeast"])}"
-        elsif arg.has_key?(:southwest) && arg.has_key?(:northeast)
-          return "#{latlng(arg[:southwest])}|#{latlng(arg[:northeast])}"
-        end
+        southwest = arg[:southwest] || arg["southwest"]
+        northeast = arg[:northeast] || arg["northeast"]
+        return "#{latlng(southwest)}|#{latlng(northeast)}"
       end
 
       raise ArgumentError, "Expected a bounds (southwest/northeast) Hash, but got #{arg.class}"
+    end
+
+    # Converts an array of waypoints (path) to the format expected by the Google Maps
+    # server.
+    #
+    # Accept two representation of waypoint:
+    #
+    # 1. String: Name of place or comma-separated lat/lon pair.
+    # 2. Hash/Array: Lat/lon pair.
+    #
+    # @param [Array, String, Hash] waypoints Path.
+    #
+    # @return [String]
+    def waypoints(waypoints)
+      if waypoints.kind_of?(Array) and waypoints.length == 2 and waypoints[0].kind_of?(Numeric) and waypoints[1].kind_of?(Numeric)
+        waypoints = [waypoints]
+      end
+
+      waypoints = as_list(waypoints)
+      return join_list('|', waypoints.map { |k| k.kind_of?(String) ? k : latlng(k) })
     end
 
     # Decodes a Polyline string into a list of lat/lng hash.

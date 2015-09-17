@@ -1,3 +1,5 @@
+require_relative './validator'
+
 module GoogleMapsService
 
   # Performs requests to the Google Maps Distance Matrix API.
@@ -39,47 +41,26 @@ module GoogleMapsService
                         departure_time: nil, arrival_time: nil, transit_mode: nil,
                         transit_routing_preference: nil)
       params = {
-        origins: _convert_path(origins),
-        destinations: _convert_path(destinations)
+        origins: GoogleMapsService::Convert.waypoints(origins),
+        destinations: GoogleMapsService::Convert.waypoints(destinations)
       }
 
-      if mode
-        # NOTE(broady): the mode parameter is not validated by the Maps API
-        # server. Check here to prevent silent failures.
-        unless ["driving", "walking", "bicycling", "transit"].include?(mode)
-          raise ArgumentError, "Invalid travel mode."
-        end
-        params[:mode] = mode
-      end
-
       params[:language] = language if language
-
-      if avoid
-        unless ["tolls", "highways", "ferries"].include?(avoid)
-          raise ArgumentError, "Invalid route restriction."
-        end
-        params[:avoid] = avoid
-      end
-
+      params[:mode] = GoogleMapsService::Validator.travel_mode(mode) if mode
+      params[:avoid] = GoogleMapsService::Validator.avoid(avoid) if avoid
 
       params[:units] = units if units
-      params[:departure_time] = convert.time(departure_time) if departure_time
-      params[:arrival_time] = convert.time(arrival_time) if arrival_time
+      params[:departure_time] = GoogleMapsService::Convert.time(departure_time) if departure_time
+      params[:arrival_time] = GoogleMapsService::Convert.time(arrival_time) if arrival_time
 
       if departure_time and arrival_time
-        raise ArgumentError, "Should not specify both departure_time and arrival_time."
+        raise ArgumentError, 'Should not specify both departure_time and arrival_time.'
       end
 
-      params[:transit_mode] = convert.join_list("|", transit_mode) if transit_mode
+      params[:transit_mode] = GoogleMapsService::Convert.join_list("|", transit_mode) if transit_mode
       params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
 
-      return get("/maps/api/distancematrix/json", params)
+      return get('/maps/api/distancematrix/json', params)
     end
-
-    private
-      def _convert_path(waypoints)
-        waypoints = GoogleMapsService::Convert.as_list(waypoints)
-        return GoogleMapsService::Convert.join_list("|", waypoints.map { |k| k.kind_of?(String) ? k : GoogleMapsService::Convert.latlng(k) })
-      end
   end
 end

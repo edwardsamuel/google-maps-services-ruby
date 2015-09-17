@@ -5,7 +5,7 @@ describe GoogleMapsService::DistanceMatrix do
 
   before(:example) do
     stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/distancematrix\/.*/)
-      .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+      .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","rows":[]}')
   end
 
   context 'basic params' do
