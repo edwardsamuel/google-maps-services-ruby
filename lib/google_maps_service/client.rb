@@ -1,12 +1,13 @@
 require 'uri'
 require 'hurley'
 require 'multi_json'
+require 'retriable'
 
 module GoogleMapsService
   class Client
     USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsService::VERSION}"
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
-    RETRIABLE_STATUSES = [500, 503, 504]
+    RETRIABLE_ERRORS = [GoogleMapsService::Error::ServerError, GoogleMapsService::Error::RateLimitError]
 
     include GoogleMapsService::Directions
     include GoogleMapsService::DistanceMatrix
@@ -28,10 +29,27 @@ module GoogleMapsService
     # @return [String]
     attr_reader :client_secret
 
+    # Connection timeout for HTTP requests, in seconds.
+    # You should specify read_timeout in addition to this option.
+    # @return [Integer]
+    attr_reader :connect_timeout
+
+    # Read timeout for HTTP requests, in seconds.
+    # You should specify connect_timeout in addition to this
+    # @return [Integer]
+    attr_reader :read_timeout
+
+    # Timeout across multiple retriable requests, in seconds.
+    # @return [Integer]
+    attr_reader :retry_timeout
+
     def initialize(options={})
       @key = options[:key] || GoogleMapsService.key
       @client_id = options[:client_id] || GoogleMapsService.client_id
       @client_secret = options[:client_secret] || GoogleMapsService.client_secret
+      @connect_timeout = options[:connect_timeout] || GoogleMapsService.connect_timeout
+      @read_timeout = options[:read_timeout] || GoogleMapsService.read_timeout
+      @retry_timeout = options[:retry_timeout] || GoogleMapsService.retry_timeout || 60
     end
 
     # Get the current HTTP client
@@ -47,18 +65,23 @@ module GoogleMapsService
     def new_client
       client = Hurley::Client.new
       client.request_options.query_class = Hurley::Query::Flat
+      client.request_options.timeout = @read_timeout if @read_timeout
+      client.request_options.open_timeout = @connect_timeout if @connect_timeout
       client.header[:user_agent] = USER_AGENT
       client
     end
 
     def get(path, params, base_url: DEFAULT_BASE_URL, accepts_client_id: true, custom_response_decoder: nil)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
-      response = client.get url
 
-      if custom_response_decoder
-        return custom_response_decoder.call(response)
+      Retriable.retriable timeout: @retry_timeout,
+                          on: RETRIABLE_ERRORS do |try|
+        response = client.get url
+        if custom_response_decoder
+          return custom_response_decoder.call(response)
+        end
+        return decode_response_body(response)
       end
-      return decode_response_body(response)
     end
 
     # Extract and parse body response as hash. Throw an error if there is something wrong with the response.

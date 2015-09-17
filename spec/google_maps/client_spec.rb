@@ -69,4 +69,41 @@ EOF
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?address=Sesame+St.&client=foo&signature=fxbWUIcNPZSekVOhp2ul9LW5TpY=')).to have_been_made
     end
   end
+
+  context 'with over query limit' do
+    before(:example) do
+      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OVER_QUERY_LIMIT"}').then
+        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+    end
+
+    it 'should make request twice' do
+      results = client.geocode(address: 'Sydney')
+      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
+    end
+  end
+
+  context 'with server error' do
+    before(:example) do
+      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+        .to_return(:status => 500, body: 'Internal server error.').then
+        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+    end
+
+    it 'should make request twice' do
+      results = client.geocode(address: 'Sydney')
+      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
+    end
+  end
+
+  context 'with connection failed' do
+    before(:example) do
+      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+        .to_raise(Hurley::ConnectionFailed)
+    end
+
+    it 'should raise Hurley::ConnectionFailed' do
+      expect { client.geocode(address: 'Sydney') }.to raise_error Hurley::ConnectionFailed
+    end
+  end
 end

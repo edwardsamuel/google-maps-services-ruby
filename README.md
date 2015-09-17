@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/google_maps_service.svg)](http://badge.fury.io/rb/google_maps_service) [![Build Status](https://travis-ci.org/edwardsamuel/google-maps-services-ruby.svg?branch=master)](https://travis-ci.org/edwardsamuel/google-maps-services-ruby) [![Dependency Status](https://gemnasium.com/edwardsamuel/google-maps-services-ruby.svg)](https://gemnasium.com/edwardsamuel/google-maps-services-ruby) [![Code Climate](https://codeclimate.com/github/edwardsamuel/google-maps-services-ruby/badges/gpa.svg)](https://codeclimate.com/github/edwardsamuel/google-maps-services-ruby) [![Coverage Status](https://coveralls.io/repos/edwardsamuel/google-maps-services-ruby/badge.svg?branch=master&service=github)](https://coveralls.io/github/edwardsamuel/google-maps-services-ruby?branch=master)
 
-*This is porting of [Python Client for Google Maps Services](https://github.com/googlemaps/google-maps-services-python). All Google Maps Service APIs are supported, but some features (e.g: auto retry) are not supported right now.*
+*This is porting of [Python Client for Google Maps Services](https://github.com/googlemaps/google-maps-services-python). All Google Maps Service APIs are supported, but some features (e.g: rate limiting) are not supported right now.*
 
 ## Description
 
