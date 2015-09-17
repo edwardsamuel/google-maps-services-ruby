@@ -1,3 +1,5 @@
+require_relative './validator'
+
 module GoogleMapsService
 
   # Performs requests to the Google Maps Directions API.
@@ -47,14 +49,7 @@ module GoogleMapsService
         destination: _convert_waypoint(destination)
       }
 
-      if mode
-        # NOTE(broady): the mode parameter is not validated by the Maps API
-        # server. Check here to prevent silent failures.
-        unless ["driving", "walking", "bicycling", "transit"].include?(mode)
-          raise ArgumentError, "Invalid travel mode."
-        end
-        params[:mode] = mode
-      end
+      params[:mode] = GoogleMapsService::Validator.travel_mode(mode) if mode
 
       if waypoints
         waypoints = GoogleMapsService::Convert.as_list(waypoints)
@@ -64,8 +59,8 @@ module GoogleMapsService
         params[:waypoints] = GoogleMapsService::Convert.join_list("|", waypoints)
       end
 
-      params[:alternatives] = "true" if alternatives
-      params[:avoid] = GoogleMapsService::Convert.join_list("|", avoid) if avoid
+      params[:alternatives] = 'true' if alternatives
+      params[:avoid] = GoogleMapsService::Convert.join_list('|', avoid) if avoid
       params[:language] = language if language
       params[:units] = units if units
       params[:region] = region if region
@@ -73,13 +68,13 @@ module GoogleMapsService
       params[:arrival_time] = GoogleMapsService::Convert.time(arrival_time) if arrival_time
 
       if departure_time and arrival_time
-        raise ArgumentError, "Should not specify both departure_time and arrival_time."
+        raise ArgumentError, 'Should not specify both departure_time and arrival_time.'
       end
 
       params[:transit_mode] = GoogleMapsService::Convert.join_list("|", transit_mode) if transit_mode
       params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
 
-      return get("/maps/api/directions/json", params)[:routes]
+      return get('/maps/api/directions/json', params)[:routes]
     end
 
     private

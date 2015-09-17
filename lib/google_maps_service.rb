@@ -1,6 +1,6 @@
 module GoogleMapsService
   class << self
-    attr_accessor :key, :client_id, :client_secret, :ssl, :connection_middleware
+    attr_accessor :key, :client_id, :client_secret, :connect_timeout, :read_timeout, :retry_timeout
 
     def configure
       yield self
