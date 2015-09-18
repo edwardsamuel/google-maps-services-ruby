@@ -2,6 +2,7 @@ require 'uri'
 require 'hurley'
 require 'multi_json'
 require 'retriable'
+require 'thread'
 
 module GoogleMapsService
   class Client
@@ -43,6 +44,12 @@ module GoogleMapsService
     # @return [Integer]
     attr_reader :retry_timeout
 
+    # Number of queries per second permitted.
+    # If the rate limit is reached, the client will sleep for
+    # the appropriate amount of time before it runs the current query.
+    # @return [Integer]
+    attr_reader :queries_per_second
+
     def initialize(options={})
       @key = options[:key] || GoogleMapsService.key
       @client_id = options[:client_id] || GoogleMapsService.client_id
@@ -50,6 +57,15 @@ module GoogleMapsService
       @connect_timeout = options[:connect_timeout] || GoogleMapsService.connect_timeout
       @read_timeout = options[:read_timeout] || GoogleMapsService.read_timeout
       @retry_timeout = options[:retry_timeout] || GoogleMapsService.retry_timeout || 60
+      @queries_per_second = options[:queries_per_second] || GoogleMapsService.queries_per_second
+
+      # Prepare "tickets" for calling API
+      if @queries_per_second
+        @sent_times = SizedQueue.new @queries_per_second
+        @queries_per_second.times do
+          @sent_times << 0
+        end
+      end
     end
 
     # Get the current HTTP client
@@ -74,13 +90,21 @@ module GoogleMapsService
     def get(path, params, base_url: DEFAULT_BASE_URL, accepts_client_id: true, custom_response_decoder: nil)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
 
-      Retriable.retriable timeout: @retry_timeout,
-                          on: RETRIABLE_ERRORS do |try|
-        response = client.get url
-        if custom_response_decoder
-          return custom_response_decoder.call(response)
+      Retriable.retriable timeout: @retry_timeout, on: RETRIABLE_ERRORS do |try|
+        # Get/wait the request "ticket" if QPS is configured
+        # Check for previous request time, it must be more than a second ago before calling new request
+        if @sent_times
+          elapsed_since_earliest = Time.now - @sent_times.pop
+          sleep(1 - elapsed_since_earliest) if elapsed_since_earliest.to_f < 1
         end
-        return decode_response_body(response)
+
+        response = client.get url
+
+        # Release request "ticket"
+        @sent_times << Time.now if @sent_times
+
+        return custom_response_decoder.call(response) if custom_response_decoder
+        decode_response_body(response)
       end
     end
 
@@ -102,27 +126,17 @@ module GoogleMapsService
 
       body = MultiJson.load(response.body, :symbolize_keys => true)
 
-      api_status = body[:status]
-      if api_status == "OK" or api_status == "ZERO_RESULTS"
+      case body[:status]
+      when 'OK', 'ZERO_RESULTS'
         return body
-      end
-
-      if api_status == "OVER_QUERY_LIMIT"
+      when 'OVER_QUERY_LIMIT'
         raise GoogleMapsService::Error::RateLimitError.new(response), body[:error_message]
-      end
-
-      if api_status == "REQUEST_DENIED"
+      when 'REQUEST_DENIED'
         raise GoogleMapsService::Error::RequestDeniedError.new(response), body[:error_message]
-      end
-
-      if api_status == "INVALID_REQUEST"
+      when 'INVALID_REQUEST'
         raise GoogleMapsService::Error::InvalidRequestError.new(response), body[:error_message]
-      end
-
-      if body[:error_message]
-        raise GoogleMapsService::Error::ApiError.new(response), body[:error_message]
       else
-        raise GoogleMapsService::Error::ApiError.new(response)
+        raise GoogleMapsService::Error::ApiError.new(response), body[:error_message]
       end
     end
 
@@ -131,20 +145,20 @@ module GoogleMapsService
       when 200..300
         # Do-nothing
       when 301, 302, 303, 307
-        message ||= sprintf('Redirect to %s', response.header[:location])
+        message = sprintf('Redirect to %s', response.header[:location])
         raise GoogleMapsService::Error::RedirectError.new(response), message
       when 401
-        message ||= 'Unauthorized'
-        raise GoogleMapsService::Error::ClientError.new(response)
+        message = 'Unauthorized'
+        raise GoogleMapsService::Error::ClientError.new(response), message
       when 304, 400, 402...500
-        message ||= 'Invalid request'
-        raise GoogleMapsService::Error::ClientError.new(response)
+        message = 'Invalid request'
+        raise GoogleMapsService::Error::ClientError.new(response), message
       when 500..600
-        message ||= 'Server error'
-        raise GoogleMapsService::Error::ServerError.new(response)
+        message = 'Server error'
+        raise GoogleMapsService::Error::ServerError.new(response), message
       else
-        message ||= 'Unknown error'
-        raise GoogleMapsService::Error::TransmissionError.new(response)
+        message = 'Unknown error'
+        raise GoogleMapsService::Error::Error.new(response), message
       end
     end
 
