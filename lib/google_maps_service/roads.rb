@@ -95,25 +95,18 @@ module GoogleMapsService
           error = body[:error]
           status = error[:status]
 
-          if status == 'INVALID_ARGUMENT'
-            if error[:message] == 'The provided API key is invalid.'
+          case status
+            when 'INVALID_ARGUMENT'
+              if error[:message] == 'The provided API key is invalid.'
+                raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
+              end
+              raise GoogleMapsService::Error::InvalidRequestError.new(response), error[:message]
+            when 'PERMISSION_DENIED'
               raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
-            end
-            raise GoogleMapsService::Error::InvalidRequestError.new(response), error[:message]
-          end
-
-          if status == 'PERMISSION_DENIED'
-            raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
-          end
-
-          if status == 'RESOURCE_EXHAUSTED'
-            raise GoogleMapsService::Error::RateLimitError.new(response), error[:message]
-          end
-
-          if error.has_key?(:message)
-            raise GoogleMapsService::Error::ApiError.new(response), error[:message]
-          else
-            raise GoogleMapsService::Error::ApiError.new(response)
+            when 'RESOURCE_EXHAUSTED'
+              raise GoogleMapsService::Error::RateLimitError.new(response), error[:message]
+            else
+              raise GoogleMapsService::Error::ApiError.new(response), error[:message]
           end
         end
 
