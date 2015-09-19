@@ -11,7 +11,7 @@ describe GoogleMapsService::Directions do
   context 'simple directions' do
     it 'should call Google Maps Web Service' do
       # Simplest directions request. Driving directions by default.
-      routes = client.directions(origin: 'Sydney', destination: 'Melbourne')
+      routes = client.directions('Sydney', 'Melbourne')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney&destination=Melbourne&key=%s' %
                           api_key)).to have_been_made
     end
@@ -19,12 +19,12 @@ describe GoogleMapsService::Directions do
 
   context 'complex request' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Sydney', destination: 'Melbourne',
+      routes = client.directions('Sydney', 'Melbourne',
                                      mode: 'bicycling',
                                      avoid: ['highways', 'tolls', 'ferries'],
                                      units: 'metric',
-                                     region: 'us')
-      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney&avoid=highways%%7Ctolls%%7Cferries&destination=Melbourne&mode=bicycling&key=%s&units=metric&region=us' %
+                                     region: 'au')
+      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney&avoid=highways%%7Ctolls%%7Cferries&destination=Melbourne&mode=bicycling&key=%s&units=metric&region=au' %
                           api_key)).to have_been_made
     end
   end
@@ -32,7 +32,7 @@ describe GoogleMapsService::Directions do
   context 'transit with departure time' do
     it 'should call Google Maps Web Service' do
       now = Time.now
-      routes = client.directions(origin: 'Sydney Town Hall', destination: 'Parramatta, NSW',
+      routes = client.directions('Sydney Town Hall', 'Parramatta, NSW',
                                      mode: 'transit',
                                      departure_time: now)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney+Town+Hall&key=%s&destination=Parramatta%%2C+NSW&mode=transit&departure_time=%d' %
@@ -43,7 +43,7 @@ describe GoogleMapsService::Directions do
   context 'transit with arrival time' do
     it 'should call Google Maps Web Service' do
       an_hour_from_now = Time.now - (1.0/24)
-      routes = client.directions(origin: 'Sydney Town Hall', destination: 'Parramatta, NSW',
+      routes = client.directions('Sydney Town Hall', 'Parramatta, NSW',
                                      mode: 'transit',
                                      arrival_time: an_hour_from_now)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney+Town+Hall&arrival_time=%d&destination=Parramatta%%2C+NSW&mode=transit&key=%s' %
@@ -53,14 +53,14 @@ describe GoogleMapsService::Directions do
 
   context 'crazy travel mode' do
     it 'should throw ArgumentError' do
-      expect { client.directions(origin: '48 Pirrama Road, Pyrmont, NSW', destination: 'Sydney Town Hall',
+      expect { client.directions('48 Pirrama Road, Pyrmont, NSW', 'Sydney Town Hall',
                                 mode: 'crawling') }.to raise_error ArgumentError
     end
   end
 
   context 'travel mode round trip' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Town Hall, Sydney', destination: 'Parramatta, NSW',
+      routes = client.directions('Town Hall, Sydney', 'Parramatta, NSW',
                                      mode: 'bicycling')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Town+Hall%%2C+Sydney&destination=Parramatta%%2C+NSW&mode=bicycling&key=%s' % api_key)).to have_been_made
     end
@@ -69,7 +69,7 @@ describe GoogleMapsService::Directions do
   context 'brooklyn to queens by transit' do
     it 'should call Google Maps Web Service' do
       now = Time.now
-      routes = client.directions(origin: 'Brooklyn', destination: 'Queens',
+      routes = client.directions('Brooklyn', 'Queens',
                                      mode: 'transit',
                                      departure_time: now)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Brooklyn&key=%s&destination=Queens&mode=transit&departure_time=%d' % [api_key, now.to_i])).to have_been_made
@@ -78,7 +78,7 @@ describe GoogleMapsService::Directions do
 
   context 'boston to concord via charlestown and lexington' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Boston, MA', destination: 'Concord, MA',
+      routes = client.directions('Boston, MA', 'Concord, MA',
                                      waypoints: ['Charlestown, MA', 'Lexington, MA'])
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Boston%%2C+MA&destination=Concord%%2C+MA&waypoints=Charlestown%%2C+MA%%7CLexington%%2C+MA&key=%s' % api_key)).to have_been_made
     end
@@ -86,7 +86,7 @@ describe GoogleMapsService::Directions do
 
   context 'adelaide wine tour' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Adelaide, SA', destination: 'Adelaide, SA',
+      routes = client.directions('Adelaide, SA', 'Adelaide, SA',
                                      waypoints: ['Barossa Valley, SA',
                                                 'Clare, SA',
                                                 'Connawarra, SA',
@@ -98,7 +98,7 @@ describe GoogleMapsService::Directions do
 
   context 'toledo to madrid in spain' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Toledo', destination: 'Madrid',
+      routes = client.directions('Toledo', 'Madrid',
                                      region: 'es')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Toledo&region=es&destination=Madrid&key=%s' %
                           api_key)).to have_been_made
@@ -112,14 +112,14 @@ describe GoogleMapsService::Directions do
     end
 
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Toledo', destination: 'Madrid')
+      routes = client.directions('Toledo', 'Madrid')
       expect(routes.length).to eq(0)
     end
   end
 
   context 'language parameter' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Toledo', destination: 'Madrid',
+      routes = client.directions('Toledo', 'Madrid',
                                      region: 'es',
                                      language: 'es')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Toledo&region=es&destination=Madrid&key=%s&language=es' % api_key)).to have_been_made
@@ -128,7 +128,7 @@ describe GoogleMapsService::Directions do
 
   context 'alternatives' do
     it 'should call Google Maps Web Service' do
-      routes = client.directions(origin: 'Sydney Town Hall', destination: 'Parramatta Town Hall',
+      routes = client.directions('Sydney Town Hall', 'Parramatta Town Hall',
                                      alternatives: true)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney+Town+Hall&destination=Parramatta+Town+Hall&alternatives=true&key=%s' % api_key)).to have_been_made
     end

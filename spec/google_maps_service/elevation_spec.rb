@@ -10,14 +10,14 @@ describe GoogleMapsService::Elevation do
 
   context 'elevation single' do
     it 'should call Google Maps Web Service' do
-      results = client.elevation(locations: [40.714728, -73.998672])
+      results = client.elevation([40.714728, -73.998672])
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/elevation/json?locations=40.714728%%2C-73.998672&key=%s' % api_key)).to have_been_made
     end
   end
 
   context 'elevation single list' do
     it 'should call Google Maps Web Service' do
-      results = client.elevation(locations: [[40.714728, -73.998672]])
+      results = client.elevation([[40.714728, -73.998672]])
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/elevation/json?locations=40.714728%%2C-73.998672&key=%s' % api_key)).to have_been_made
     end
   end
@@ -25,7 +25,7 @@ describe GoogleMapsService::Elevation do
   context 'elevation multiple' do
     it 'should call Google Maps Web Service' do
       locations = [[40.714728, -73.998672], [-34.397, 150.644]]
-      results = client.elevation(locations: locations)
+      results = client.elevation(locations)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/elevation/json?locations=40.714728%%2C-73.998672%%7C-34.397000%%2C150.644000&key=%s' % api_key)).to have_been_made
     end
   end
@@ -37,7 +37,7 @@ describe GoogleMapsService::Elevation do
     end
 
     it 'should raise InvalidRequestError' do
-      expect { client.elevation_along_path(path: [[40.714728, -73.998672]], samples: 5) }.to raise_error GoogleMapsService::Error::InvalidRequestError
+      expect { client.elevation_along_path([[40.714728, -73.998672]], 5) }.to raise_error GoogleMapsService::Error::InvalidRequestError
     end
   end
 
@@ -45,7 +45,7 @@ describe GoogleMapsService::Elevation do
     it 'should call Google Maps Web Service' do
       path = [[40.714728, -73.998672], [-34.397, 150.644]]
 
-      results = client.elevation_along_path(path: path, samples: 5)
+      results = client.elevation_along_path(path, 5)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/elevation/json?path=40.714728%%2C-73.998672%%7C-34.397000%%2C150.644000&key=%s&samples=5' % api_key)).to have_been_made
     end
   end

@@ -63,7 +63,7 @@ describe GoogleMapsService::Client do
     end
 
     it 'should be signed' do
-      client.geocode(address: 'Sesame St.')
+      client.geocode('Sesame St.')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?address=Sesame+St.&client=foo&signature=fxbWUIcNPZSekVOhp2ul9LW5TpY=')).to have_been_made
     end
   end
@@ -93,7 +93,7 @@ EOF
     end
 
     it 'should raise GoogleMapsService::Error::RequestDeniedError' do
-      expect { client.directions(origin: "Sydney", destination: "Melbourne") }.to raise_error GoogleMapsService::Error::RequestDeniedError
+      expect { client.directions("Sydney", "Melbourne") }.to raise_error GoogleMapsService::Error::RequestDeniedError
     end
   end
 
@@ -105,7 +105,7 @@ EOF
     end
 
     it 'should make request twice' do
-      results = client.geocode(address: 'Sydney')
+      results = client.geocode('Sydney')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
     end
   end
@@ -118,7 +118,7 @@ EOF
     end
 
     it 'should make request twice' do
-      results = client.geocode(address: 'Sydney')
+      results = client.geocode('Sydney')
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
     end
   end

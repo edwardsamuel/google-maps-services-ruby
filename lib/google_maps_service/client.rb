@@ -5,9 +5,17 @@ require 'retriable'
 require 'thread'
 
 module GoogleMapsService
+
+  # Core client functionality, common across all API requests (including performing
+  # HTTP requests).
   class Client
+    # Default user agent
     USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsService::VERSION}"
+
+    # Default Google Maps Web Service base endpoints
     DEFAULT_BASE_URL = "https://maps.googleapis.com"
+
+    # Errors those could be retriable.
     RETRIABLE_ERRORS = [GoogleMapsService::Error::ServerError, GoogleMapsService::Error::RateLimitError]
 
     include GoogleMapsService::Directions

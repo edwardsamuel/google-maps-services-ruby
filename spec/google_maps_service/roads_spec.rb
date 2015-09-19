@@ -11,7 +11,7 @@ describe GoogleMapsService::Roads do
 
     context 'snap' do
       it 'should call Google Maps Web Service' do
-        results = client.snap_to_roads(path: [40.714728, -73.998672])
+        results = client.snap_to_roads([40.714728, -73.998672])
         expect(a_request(:get, 'https://roads.googleapis.com/v1/snapToRoads?path=40.714728%%2C-73.998672&key=%s' % api_key)).to have_been_made
       end
     end
@@ -25,7 +25,7 @@ describe GoogleMapsService::Roads do
 
     context 'path' do
       it 'should call Google Maps Web Service' do
-        results = client.snapped_speed_limits(path: [[1, 2],[3, 4]])
+        results = client.snapped_speed_limits([[1, 2],[3, 4]])
         expect(a_request(:get, "https://roads.googleapis.com/v1/speedLimits?path=1.000000%%2C2.000000|3.000000%%2C4.000000&key=%s" % api_key)).to have_been_made
       end
     end
@@ -39,14 +39,14 @@ describe GoogleMapsService::Roads do
 
     context 'speedlimits' do
       it 'should call Google Maps Web Service' do
-        results = client.speed_limits(place_ids: "id1")
+        results = client.speed_limits("id1")
         expect(a_request(:get, "https://roads.googleapis.com/v1/speedLimits?placeId=id1&key=%s" % api_key)).to have_been_made
       end
     end
 
     context 'speedlimits multiple' do
       it 'should call Google Maps Web Service' do
-        results = client.speed_limits(place_ids: ["id1", "id2", "id3"])
+        results = client.speed_limits(["id1", "id2", "id3"])
         expect(a_request(:get, 'https://roads.googleapis.com/v1/speedLimits?placeId=id1&placeId=id2&placeId=id3&key=%s' % api_key)).to have_been_made
       end
     end
@@ -73,7 +73,7 @@ describe GoogleMapsService::Roads do
     end
 
     it 'should make request twice' do
-      results = client.speed_limits(place_ids: [])
+      results = client.speed_limits([])
       expect(a_request(:get, 'https://roads.googleapis.com/v1/speedLimits?key=%s' % api_key)).to have_been_made.times(2)
     end
   end
@@ -96,7 +96,7 @@ describe GoogleMapsService::Roads do
       end
 
       it 'should raise GoogleMapsService::Error::ApiError' do
-        expect { client.speed_limits(place_ids: []) }.to raise_error GoogleMapsService::Error::ApiError
+        expect { client.speed_limits([]) }.to raise_error GoogleMapsService::Error::ApiError
       end
     end
 
@@ -107,7 +107,7 @@ describe GoogleMapsService::Roads do
       end
 
       it 'should raise GoogleMapsService::Error::ApiError' do
-        expect { client.speed_limits(place_ids: []) }.to raise_error GoogleMapsService::Error::ApiError
+        expect { client.speed_limits([]) }.to raise_error GoogleMapsService::Error::ApiError
       end
     end
 
@@ -127,7 +127,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::InvalidRequestError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::InvalidRequestError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::InvalidRequestError
       end
     end
 
@@ -147,7 +147,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::RequestDeniedError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RequestDeniedError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RequestDeniedError
       end
     end
 
@@ -167,7 +167,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::RequestDeniedError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RequestDeniedError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RequestDeniedError
       end
     end
 
@@ -187,7 +187,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::RateLimitError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RateLimitError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::RateLimitError
       end
     end
 
@@ -207,7 +207,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::ApiError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::ApiError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::ApiError
       end
     end
 
@@ -226,7 +226,7 @@ EOF
       end
 
       it 'should raise GoogleMapsService::Error::ApiError' do
-        expect { client.speed_limits(place_ids: 'aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::ApiError
+        expect { client.speed_limits('aChIJqaknMTeuEmsRUYCD5Wd9ARM') }.to raise_error GoogleMapsService::Error::ApiError
       end
     end
   end

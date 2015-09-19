@@ -23,8 +23,8 @@ module GoogleMapsService
     #
     # Accepts various representations:
     #
-    # 1. Hash with two entries - +lat+ and +lng+
-    # 2. Array or list - e.g. +[-33, 151]+
+    # 1. Hash with two entries - `lat` and `lng`
+    # 2. Array or list - e.g. `[-33, 151]`
     #
     # @param [Hash, Array] arg The lat/lon hash or array pair.
     #
@@ -134,6 +134,23 @@ module GoogleMapsService
       end
 
       raise ArgumentError, "Expected a bounds (southwest/northeast) Hash, but got #{arg.class}"
+    end
+
+    # Converts a waypoints to the format expected by the Google Maps server.
+    #
+    # Accept two representation of waypoint:
+    #
+    # 1. String: Name of place or comma-separated lat/lon pair.
+    # 2. Hash/Array: Lat/lon pair.
+    #
+    # @param [Array, String, Hash] waypoint Path.
+    #
+    # @return [String]
+    def waypoint(waypoint)
+      if waypoint.kind_of?(String)
+        return waypoint
+      end
+      return GoogleMapsService::Convert.latlng(waypoint)
     end
 
     # Converts an array of waypoints (path) to the format expected by the Google Maps

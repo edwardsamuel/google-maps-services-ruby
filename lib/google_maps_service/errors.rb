@@ -1,10 +1,13 @@
 module GoogleMapsService
+  # Specific Google Maps Service error
   module Error
     # Base error, capable of wrapping another
     class BaseError < StandardError
+      # HTTP response object
+      # @return [Hurley::Response]
       attr_reader :response
 
-      def initialize(response)
+      def initialize(response = nil)
         @response = response
       end
     end
