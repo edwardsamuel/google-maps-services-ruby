@@ -170,7 +170,7 @@ module GoogleMapsService
       end
 
       waypoints = as_list(waypoints)
-      return join_list('|', waypoints.map { |k| k.kind_of?(String) ? k : latlng(k) })
+      return join_list('|', waypoints.map { |k| waypoint(k) })
     end
 
     # Decodes a Polyline string into a list of lat/lng hash.

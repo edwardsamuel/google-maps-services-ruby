@@ -70,4 +70,21 @@ describe GoogleMapsService::DistanceMatrix do
                           api_key)).to have_been_made
     end
   end
+
+
+  context 'transit with departure and arrival time' do
+    it 'should raise ArgumentError' do
+      expect {
+        origins = ["Vancouver BC", "Seattle"]
+        destinations = ["San Francisco", "Victoria BC"]
+        now = Time.now
+        an_hour_from_now = Time.now + (1.0/24)
+
+        matrix = client.distance_matrix(origins, destinations,
+                                       mode: 'transit',
+                                       departure_time: now,
+                                       arrival_time: an_hour_from_now)
+      }.to raise_error ArgumentError
+    end
+  end
 end

@@ -42,12 +42,25 @@ describe GoogleMapsService::Directions do
 
   context 'transit with arrival time' do
     it 'should call Google Maps Web Service' do
-      an_hour_from_now = Time.now - (1.0/24)
+      an_hour_before_now = Time.now - (1.0/24)
       routes = client.directions('Sydney Town Hall', 'Parramatta, NSW',
                                      mode: 'transit',
-                                     arrival_time: an_hour_from_now)
+                                     arrival_time: an_hour_before_now)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/directions/json?origin=Sydney+Town+Hall&arrival_time=%d&destination=Parramatta%%2C+NSW&mode=transit&key=%s' %
-                          [an_hour_from_now.to_i, api_key])).to have_been_made
+                          [an_hour_before_now.to_i, api_key])).to have_been_made
+    end
+  end
+
+  context 'transit with departure and arrival time' do
+    it 'should raise ArgumentError' do
+      expect {
+        now = Time.now
+        an_hour_from_now = Time.now + (1.0/24)
+        routes = client.directions('Sydney Town Hall', 'Parramatta, NSW',
+                                       mode: 'transit',
+                                       departure_time: now,
+                                       arrival_time: an_hour_from_now)
+      }.to raise_error ArgumentError
     end
   end
 

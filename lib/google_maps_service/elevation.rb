@@ -21,7 +21,7 @@ module GoogleMapsService
     # @return [Array] Array of elevation data responses
     def elevation(locations)
       params = {
-        locations: GoogleMapsService::Convert.waypoints(locations || options[:locations])
+        locations: GoogleMapsService::Convert.waypoints(locations)
       }
 
       return get('/maps/api/elevation/json', params)[:results]

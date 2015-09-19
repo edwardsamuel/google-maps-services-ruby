@@ -4,6 +4,15 @@ require 'multi_json'
 require 'retriable'
 require 'thread'
 
+require 'google_maps_service/errors'
+require 'google_maps_service/convert'
+require 'google_maps_service/directions'
+require 'google_maps_service/distance_matrix'
+require 'google_maps_service/elevation'
+require 'google_maps_service/geocoding'
+require 'google_maps_service/roads'
+require 'google_maps_service/time_zone'
+
 module GoogleMapsService
 
   # Core client functionality, common across all API requests (including performing
@@ -13,7 +22,7 @@ module GoogleMapsService
     USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsService::VERSION}"
 
     # Default Google Maps Web Service base endpoints
-    DEFAULT_BASE_URL = "https://maps.googleapis.com"
+    DEFAULT_BASE_URL = 'https://maps.googleapis.com'
 
     # Errors those could be retriable.
     RETRIABLE_ERRORS = [GoogleMapsService::Error::ServerError, GoogleMapsService::Error::RateLimitError]
@@ -121,14 +130,6 @@ module GoogleMapsService
     # @param [Hurley::Response] response Web API response.
     #
     # @return [Hash] Response body as hash. The hash key will be symbolized.
-    #
-    # @raise [GoogleMapsService::Error::RedirectError] The response redirects to another URL.
-    # @raise [GoogleMapsService::Error::RequestDeniedError] The credential (key or client id pair) is not valid.
-    # @raise [GoogleMapsService::Error::ClientError] The request is invalid and should not be retried without modification.
-    # @raise [GoogleMapsService::Error::ServerError] An error occurred on the server and the request can be retried.
-    # @raise [GoogleMapsService::Error::TransmissionError] Unknown response status code.
-    # @raise [GoogleMapsService::Error::RateLimitError] The quota for the credential is already pass the limit.
-    # @raise [GoogleMapsService::Error::ApiError] The Web API error.
     def decode_response_body(response)
       check_response_status_code(response)
 
@@ -166,7 +167,7 @@ module GoogleMapsService
         raise GoogleMapsService::Error::ServerError.new(response), message
       else
         message = 'Unknown error'
-        raise GoogleMapsService::Error::Error.new(response), message
+        raise GoogleMapsService::Error::BaseError.new(response), message
       end
     end
 

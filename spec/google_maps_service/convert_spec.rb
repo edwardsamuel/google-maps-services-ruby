@@ -125,6 +125,22 @@ describe GoogleMapsService::Convert do
     end
   end
 
+  context '.waypoint' do
+    context 'with string' do
+      it 'should return string representation of waypoint' do
+        places = 'ABC'
+        expect(GoogleMapsService::Convert.waypoint(places)).to eq('ABC')
+      end
+    end
+
+    context 'with lat/lon pairs' do
+      it 'should return string representation of waypoints' do
+        path = {"latitude" => 1, "longitude" => 2}
+        expect(GoogleMapsService::Convert.waypoint(path)).to eq('1.000000,2.000000')
+      end
+    end
+  end
+
   context '.waypoints' do
     context 'with string' do
       it 'should return string representation of waypoints' do
