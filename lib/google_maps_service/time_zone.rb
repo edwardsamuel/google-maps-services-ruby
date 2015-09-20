@@ -8,10 +8,10 @@ module GoogleMapsService
     # Get time zone for a location on the earth, as well as that location's
     # time offset from UTC.
     #
-    # @example Current timezone
+    # @example Current time zone
     #   timezone = client.timezone([39.603481, -119.682251])
     #
-    # @example Timezone at certain time
+    # @example Time zone at certain time
     #   timezone = client.timezone([39.603481, -119.682251], timestamp: Time.at(1608))
     #
     # @param [Hash, Array] location The latitude/longitude value representing the location to

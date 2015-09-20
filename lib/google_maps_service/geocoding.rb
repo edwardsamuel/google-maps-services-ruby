@@ -1,5 +1,4 @@
 require 'google_maps_service/convert'
-require 'awesome_print'
 
 module GoogleMapsService
 

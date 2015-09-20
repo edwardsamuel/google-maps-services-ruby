@@ -6,5 +6,6 @@
 lib/**/*.rb
 -
 README.md
+CHANGELOG.md
 CODE_OF_CONDUCT.md
 LICENSE

@@ -5,7 +5,7 @@ module GoogleMapsService
 
     # Provides elevation data for locations provided on the surface of the
     # earth, including depth locations on the ocean floor (which return negative
-    # values)
+    # values).
     #
     # @example Single point elevation
     #   results = client.elevation({latitude: 40.714728, longitude: -73.998672})

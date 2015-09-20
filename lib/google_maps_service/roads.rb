@@ -2,7 +2,7 @@ require 'multi_json'
 
 module GoogleMapsService
 
-  # Performs requests to the Google Maps Roads API."""
+  # Performs requests to the Google Maps Roads API.
   module Roads
 
     # Base URL of Google Maps Roads API
