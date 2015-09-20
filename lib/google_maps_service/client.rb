@@ -147,10 +147,12 @@ module GoogleMapsService
           sleep(1 - elapsed_since_earliest) if elapsed_since_earliest.to_f < 1
         end
 
-        response = client.get url
-
-        # Release request "ticket"
-        @sent_times << Time.now if @sent_times
+        begin
+          response = client.get url
+        ensure
+          # Release request "ticket"
+          @sent_times << Time.now if @sent_times
+        end
 
         return custom_response_decoder.call(response) if custom_response_decoder
         decode_response_body(response)
