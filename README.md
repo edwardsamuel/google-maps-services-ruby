@@ -88,6 +88,10 @@ Or install it yourself as:
 
     gem install google_maps_service
 
+In your Ruby code, add this line to load this gem:
+
+    require 'google_maps_service'
+
 ## Usage
 
 Before you request Google Maps API, you must configure the client.
@@ -97,6 +101,8 @@ You can view the [reference documentation](http://www.rubydoc.info/gems/google_m
 ### Configure client
 
 ```ruby
+require 'google_maps_service'
+
 # Setup API keys
 gmaps = GoogleMapsService::Client.new(key: 'Add your key here')
 
@@ -105,18 +111,31 @@ gmaps = GoogleMapsService::Client.new(
     client_id: 'Add your client id here',
     client_secret: 'Add your client secret here'
 )
+
+# More complex setup
+gmaps = GoogleMapsService::Client.new(
+    key: 'Add your key here',
+    retry_timeout: 20,      # Timeout for retrying failed request
+    queries_per_second: 10  # Limit total request per second
+)
 ```
 You can also set up the client globaly.
 
 ```ruby
+require 'google_maps_service'
+
 # Setup global parameters
 GoogleMapsService.configure do |config|
   config.key = 'Add your key here'
+  config.retry_timeout = 20
+  config.queries_per_second = 10
 end
 
-# Use global parameters
+# Initialize client using global parameters
 gmaps = GoogleMapsService::Client.new
 ```
+
+For more examples and detail (setup proxy, timeout, etc.) while initializing the client, check out [Client documentation](http://www.rubydoc.info/gems/google_maps_service/GoogleMapsService/Client#initialize-instance_method).
 
 ### Latitude/longitude pairs format
 

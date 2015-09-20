@@ -37,29 +37,19 @@ module GoogleMapsService
     # Secret key for accessing Google Maps Web Service.
     # Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key
     # @return [String]
-    attr_reader :key
+    attr_accessor :key
 
     # Client id for using Maps API for Work services.
     # @return [String]
-    attr_reader :client_id
+    attr_accessor :client_id
 
     # Client secret for using Maps API for Work services.
     # @return [String]
-    attr_reader :client_secret
-
-    # Connection timeout for HTTP requests, in seconds.
-    # You should specify read_timeout in addition to this option.
-    # @return [Integer]
-    attr_reader :connect_timeout
-
-    # Read timeout for HTTP requests, in seconds.
-    # You should specify connect_timeout in addition to this
-    # @return [Integer]
-    attr_reader :read_timeout
+    attr_accessor :client_secret
 
     # Timeout across multiple retriable requests, in seconds.
     # @return [Integer]
-    attr_reader :retry_timeout
+    attr_accessor :retry_timeout
 
     # Number of queries per second permitted.
     # If the rate limit is reached, the client will sleep for
@@ -67,14 +57,54 @@ module GoogleMapsService
     # @return [Integer]
     attr_reader :queries_per_second
 
-    def initialize(options={})
+    # Construct Google Maps Web Service API client.
+    #
+    # This gem uses [Hurley](https://github.com/lostisland/hurley) as internal HTTP client.
+    # You can configure `Hurley::Client` through `request_options` and `ssl_options` parameters.
+    # You can also directly get the `Hurley::Client` object via {#client} method.
+    #
+    # @example Setup API keys
+    #   gmaps = GoogleMapsService::Client.new(key: 'Add your key here')
+    #
+    # @example Setup client IDs
+    #   gmaps = GoogleMapsService::Client.new(
+    #       client_id: 'Add your client id here',
+    #       client_secret: 'Add your client secret here'
+    #   )
+    #
+    # @example Setup time out and QPS limit
+    #   gmaps = GoogleMapsService::Client.new(
+    #       key: 'Add your key here',
+    #       retry_timeout: 20,
+    #       queries_per_second: 10
+    #   )
+    #
+    # @example Request behind proxy
+    #   request_options = Hurley::RequestOptions.new
+    #   request_options.proxy = Hurley::Url.parse 'http://user:password@proxy.example.com:3128'
+    #
+    #   gmaps = GoogleMapsService::Client.new(
+    #       key: 'Add your key here',
+    #       request_options: request_options
+    #   )
+    #
+    # @option options [String] :key Secret key for accessing Google Maps Web Service.
+    #   Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key.
+    # @option options [String] :client_id Client id for using Maps API for Work services.
+    # @option options [String] :client_secret Client secret for using Maps API for Work services.
+    # @option options [Integer] :retry_timeout Timeout across multiple retriable requests, in seconds.
+    # @option options [Integer] :queries_per_second Number of queries per second permitted.
+    #
+    # @option options [Hurley::RequestOptions] :request_options HTTP client request options. See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
+    # @option options [Hurley::SslOptions] :ssl_options HTTP client SSL options. See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
+    def initialize(**options)
       @key = options[:key] || GoogleMapsService.key
       @client_id = options[:client_id] || GoogleMapsService.client_id
       @client_secret = options[:client_secret] || GoogleMapsService.client_secret
-      @connect_timeout = options[:connect_timeout] || GoogleMapsService.connect_timeout
-      @read_timeout = options[:read_timeout] || GoogleMapsService.read_timeout
       @retry_timeout = options[:retry_timeout] || GoogleMapsService.retry_timeout || 60
       @queries_per_second = options[:queries_per_second] || GoogleMapsService.queries_per_second
+      @request_options = options[:request_options] || GoogleMapsService.request_options
+      @ssl_options = options[:ssl_options] || GoogleMapsService.ssl_options
 
       # Prepare "tickets" for calling API
       if @queries_per_second
@@ -85,7 +115,7 @@ module GoogleMapsService
       end
     end
 
-    # Get the current HTTP client
+    # Get the current HTTP client.
     # @return [Hurley::Client]
     def client
       @client ||= new_client
@@ -93,13 +123,15 @@ module GoogleMapsService
 
     protected
 
-    # Create a new HTTP client
+    # Create a new HTTP client.
     # @return [Hurley::Client]
     def new_client
       client = Hurley::Client.new
+
+      @request_options.each_pair {|key, value| client.request_options[key] = value } if @request_options
+      @ssl_options.each_pair {|key, value| client.ssl_options[key] = value } if @ssl_options
+
       client.request_options.query_class = Hurley::Query::Flat
-      client.request_options.timeout = @read_timeout if @read_timeout
-      client.request_options.open_timeout = @connect_timeout if @connect_timeout
       client.header[:user_agent] = USER_AGENT
       client
     end

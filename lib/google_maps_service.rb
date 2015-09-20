@@ -17,16 +17,6 @@ module GoogleMapsService
     # @return [String]
     attr_accessor :client_secret
 
-    # Global connect_timeout.
-    # @see Client#connect_timeout
-    # @return [Integer]
-    attr_accessor :connect_timeout
-
-    # Global read_timeout.
-    # @see Client#read_timeout
-    # @return [Integer]
-    attr_accessor :read_timeout
-
     # Global retry_timeout.
     # @see Client#retry_timeout
     # @return [Integer]
@@ -36,6 +26,16 @@ module GoogleMapsService
     # @see Client#queries_per_second
     # @return [Integer]
     attr_accessor :queries_per_second
+
+    # Global request_options.
+    # @see Client#request_options
+    # @return [Hurley::RequestOptions]
+    attr_reader :request_options
+
+    # Global ssl_options.
+    # @see Client#ssl_options
+    # @return [Hurley::SslOptions]
+    attr_reader :ssl_options
 
     def configure
       yield self
