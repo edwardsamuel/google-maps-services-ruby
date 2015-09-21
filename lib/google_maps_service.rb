@@ -45,4 +45,5 @@ module GoogleMapsService
 
   require 'google_maps_service/version'
   require 'google_maps_service/client'
+  require 'google_maps_service/polyline'
 end

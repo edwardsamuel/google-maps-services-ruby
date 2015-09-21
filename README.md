@@ -327,14 +327,16 @@ For more usage examples and result format, check out [gem documentation](http://
 To handle Google Encoded Polyline, this gem provides encoder/decoder:
 
 ```ruby
+require 'google_maps_service/polyline' # Or, require 'google_maps_service' is enough
+
 # Decode polyline
 encoded_path = '_p~iF~ps|U_ulLnnqC_mqNvxq`@'
-path = GoogleMapsService::Convert.decode_polyline(encoded_path)
+path = GoogleMapsService::Polyline.decode(encoded_path)
 #=> [{:lat=>38.5, :lng=>-120.2}, {:lat=>40.7, :lng=>-120.95}, {:lat=>43.252, :lng=>-126.45300000000002}]
 
 # Encode polyline
 path = [[38.5, -120.2], [40.7, -120.95], [43.252, -126.453]]
-encoded_path = GoogleMapsService::Convert.encode_polyline(path)
+encoded_path = GoogleMapsService::Polyline.encode(path)
 #=> "_p~iF~ps|U_ulLnnqC_mqNvxq`@"
 ```
 
