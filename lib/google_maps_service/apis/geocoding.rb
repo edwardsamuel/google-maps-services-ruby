@@ -1,6 +1,6 @@
 require 'google_maps_service/convert'
 
-module GoogleMapsService
+module GoogleMapsService::Apis
 
   # Performs requests to the Google Maps Geocoding API.
   module Geocoding

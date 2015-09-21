@@ -1,6 +1,6 @@
-require_relative './validator'
+require_relative '../validator'
 
-module GoogleMapsService
+module GoogleMapsService::Apis
 
   # Performs requests to the Google Maps Distance Matrix API.
   module DistanceMatrix

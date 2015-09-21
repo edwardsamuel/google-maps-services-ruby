@@ -1,6 +1,6 @@
 require 'date'
 
-module GoogleMapsService
+module GoogleMapsService::Apis
 
   # Performs requests to the Google Maps TimeZone API."""
   module TimeZone

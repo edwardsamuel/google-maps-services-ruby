@@ -1,4 +1,4 @@
-module GoogleMapsService
+module GoogleMapsService::Apis
 
   # Performs requests to the Google Maps Elevation API.
   module Elevation

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMapsService::Directions do
+describe GoogleMapsService::Apis::Directions do
   include_context 'HTTP client'
 
   before(:example) do

@@ -1,6 +1,6 @@
 require 'multi_json'
 
-module GoogleMapsService
+module GoogleMapsService::Apis
 
   # Performs requests to the Google Maps Roads API.
   module Roads

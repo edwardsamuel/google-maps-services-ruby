@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMapsService::Elevation do
+describe GoogleMapsService::Apis::Elevation do
   include_context 'HTTP client'
 
   before(:example) do

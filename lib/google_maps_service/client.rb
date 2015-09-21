@@ -6,36 +6,33 @@ require 'thread'
 
 require 'google_maps_service/errors'
 require 'google_maps_service/convert'
-require 'google_maps_service/directions'
-require 'google_maps_service/distance_matrix'
-require 'google_maps_service/elevation'
-require 'google_maps_service/geocoding'
-require 'google_maps_service/roads'
-require 'google_maps_service/time_zone'
+require 'google_maps_service/apis/directions'
+require 'google_maps_service/apis/distance_matrix'
+require 'google_maps_service/apis/elevation'
+require 'google_maps_service/apis/geocoding'
+require 'google_maps_service/apis/roads'
+require 'google_maps_service/apis/time_zone'
 
 module GoogleMapsService
 
   # Core client functionality, common across all API requests (including performing
   # HTTP requests).
   class Client
-    # Default user agent
-    USER_AGENT = "GoogleGeoApiClientRuby/#{GoogleMapsService::VERSION}"
-
     # Default Google Maps Web Service base endpoints
     DEFAULT_BASE_URL = 'https://maps.googleapis.com'
 
     # Errors those could be retriable.
     RETRIABLE_ERRORS = [GoogleMapsService::Error::ServerError, GoogleMapsService::Error::RateLimitError]
 
-    include GoogleMapsService::Directions
-    include GoogleMapsService::DistanceMatrix
-    include GoogleMapsService::Elevation
-    include GoogleMapsService::Geocoding
-    include GoogleMapsService::Roads
-    include GoogleMapsService::TimeZone
+    include GoogleMapsService::Apis::Directions
+    include GoogleMapsService::Apis::DistanceMatrix
+    include GoogleMapsService::Apis::Elevation
+    include GoogleMapsService::Apis::Geocoding
+    include GoogleMapsService::Apis::Roads
+    include GoogleMapsService::Apis::TimeZone
 
     # Secret key for accessing Google Maps Web Service.
-    # Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key
+    # Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key.
     # @return [String]
     attr_accessor :key
 
@@ -132,8 +129,16 @@ module GoogleMapsService
       @ssl_options.each_pair {|key, value| client.ssl_options[key] = value } if @ssl_options
 
       client.request_options.query_class = Hurley::Query::Flat
-      client.header[:user_agent] = USER_AGENT
+      client.header[:user_agent] = user_agent
       client
+    end
+
+    # Build the user agent header
+    # @return [String]
+    def user_agent
+      sprintf('google-maps-services-ruby/%s %s',
+              GoogleMapsService::VERSION,
+              GoogleMapsService::OS_VERSION)
     end
 
     def get(path, params, base_url: DEFAULT_BASE_URL, accepts_client_id: true, custom_response_decoder: nil)

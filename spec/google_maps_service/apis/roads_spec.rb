@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMapsService::Roads do
+describe GoogleMapsService::Apis::Roads do
   include_context 'HTTP client'
 
   context '#snap_to_roads' do
