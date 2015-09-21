@@ -135,7 +135,7 @@ end
 gmaps = GoogleMapsService::Client.new
 ```
 
-For more examples and detail (setup proxy, timeout, etc.) while initializing the client, check out [Client documentation](http://www.rubydoc.info/gems/google_maps_service/GoogleMapsService/Apis/Client#initialize-instance_method).
+For more examples and detail (setup **proxy**, **timeout**, **caching**, etc.) while initializing the client, check out [Client documentation](http://www.rubydoc.info/gems/google_maps_service/GoogleMapsService/Apis/Client#initialize-instance_method).
 
 ### Latitude/longitude pairs format
 

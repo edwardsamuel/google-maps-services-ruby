@@ -85,6 +85,17 @@ module GoogleMapsService
     #       request_options: request_options
     #   )
     #
+    # @example Using Excon and Http Cache
+    #  require 'hurley-excon'       # https://github.com/lostisland/hurley-excon
+    #  require 'hurley/http_cache'  # https://github.com/plataformatec/hurley-http-cache
+    #
+    #  gmaps = GoogleMapsService::Client.new(
+    #      key: 'Add your key here',
+    #      connection: Hurley::HttpCache.new(HurleyExcon::Connection.new)
+    #  )
+    #
+    #
+    #
     # @option options [String] :key Secret key for accessing Google Maps Web Service.
     #   Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key.
     # @option options [String] :client_id Client id for using Maps API for Work services.
@@ -92,8 +103,13 @@ module GoogleMapsService
     # @option options [Integer] :retry_timeout Timeout across multiple retriable requests, in seconds.
     # @option options [Integer] :queries_per_second Number of queries per second permitted.
     #
-    # @option options [Hurley::RequestOptions] :request_options HTTP client request options. See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
-    # @option options [Hurley::SslOptions] :ssl_options HTTP client SSL options. See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
+    # @option options [Hurley::RequestOptions] :request_options HTTP client request options.
+    #     See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
+    # @option options [Hurley::SslOptions] :ssl_options HTTP client SSL options.
+    #     See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
+    # @option options [Object] :connection HTTP client connection.
+    #     By default, the default Hurley's HTTP client connection (Net::Http) will be used.
+    #     See https://github.com/lostisland/hurley/blob/master/README.md#connections.
     def initialize(**options)
       @key = options[:key] || GoogleMapsService.key
       @client_id = options[:client_id] || GoogleMapsService.client_id
@@ -102,6 +118,7 @@ module GoogleMapsService
       @queries_per_second = options[:queries_per_second] || GoogleMapsService.queries_per_second
       @request_options = options[:request_options] || GoogleMapsService.request_options
       @ssl_options = options[:ssl_options] || GoogleMapsService.ssl_options
+      @connection = options[:connection] || GoogleMapsService.connection
 
       # Prepare "tickets" for calling API
       if @queries_per_second
@@ -125,6 +142,7 @@ module GoogleMapsService
     def new_client
       client = Hurley::Client.new
 
+      client.connection = @connection if @connection
       @request_options.each_pair {|key, value| client.request_options[key] = value } if @request_options
       @ssl_options.each_pair {|key, value| client.ssl_options[key] = value } if @ssl_options
 

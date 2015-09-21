@@ -28,14 +28,19 @@ module GoogleMapsService
     attr_accessor :queries_per_second
 
     # Global request_options.
-    # @see Client#request_options
+    # @see Client#initialize-instance_method
     # @return [Hurley::RequestOptions]
     attr_reader :request_options
 
     # Global ssl_options.
-    # @see Client#ssl_options
+    # @see Client#initialize-instance_method
     # @return [Hurley::SslOptions]
     attr_reader :ssl_options
+
+    # Global connection.
+    # @see Client#initialize-instance_method
+    # @return [Object]
+    attr_reader :connection
 
     def configure
       yield self
