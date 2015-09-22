@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Edward Samuel Pasaribu']
   spec.email         = ['edwardsamuel92@gmail.com']
 
-  spec.summary       = %q{Ruby client library (unofficial) for Google Maps API Web Services}
+  spec.summary       = %q{Ruby gem for Google Maps Web Service APIs }
   spec.homepage      = %q{https://github.com/edwardsamuel/google-maps-services-ruby}
   spec.license       = 'Apache-2.0'
   spec.required_ruby_version = '>= 2.0.0'
@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'hurley', '~> 0.1'
   spec.add_runtime_dependency 'retriable', '~> 2.0', '>= 2.0.2'
   spec.add_runtime_dependency 'ruby-hmac', '~> 0.4.0'
-  spec.add_runtime_dependency 'awesome_print'
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'yard', '~> 0.8.7.6'

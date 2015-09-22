@@ -120,13 +120,8 @@ module GoogleMapsService
       @ssl_options = options[:ssl_options] || GoogleMapsService.ssl_options
       @connection = options[:connection] || GoogleMapsService.connection
 
-      # Prepare "tickets" for calling API
-      if @queries_per_second
-        @sent_times = SizedQueue.new @queries_per_second
-        @queries_per_second.times do
-          @sent_times << 0
-        end
-      end
+      #
+      initialize_qps if @queries_per_second
     end
 
     # Get the current HTTP client.
@@ -136,6 +131,14 @@ module GoogleMapsService
     end
 
     protected
+
+    # Initialize QPS queue. QPS queue is a "tickets" for calling API
+    def initialize_qps
+      @qps_queue = SizedQueue.new @queries_per_second
+      @queries_per_second.times do
+        @qps_queue << 0
+      end
+    end
 
     # Create a new HTTP client.
     # @return [Hurley::Client]
@@ -174,8 +177,8 @@ module GoogleMapsService
       Retriable.retriable timeout: @retry_timeout, on: RETRIABLE_ERRORS do |try|
         # Get/wait the request "ticket" if QPS is configured
         # Check for previous request time, it must be more than a second ago before calling new request
-        if @sent_times
-          elapsed_since_earliest = Time.now - @sent_times.pop
+        if @qps_queue
+          elapsed_since_earliest = Time.now - @qps_queue.pop
           sleep(1 - elapsed_since_earliest) if elapsed_since_earliest.to_f < 1
         end
 
@@ -183,7 +186,7 @@ module GoogleMapsService
           response = client.get url
         ensure
           # Release request "ticket"
-          @sent_times << Time.now if @sent_times
+          @qps_queue << Time.now if @qps_queue
         end
 
         return custom_response_decoder.call(response) if custom_response_decoder
@@ -257,6 +260,7 @@ module GoogleMapsService
 
     # Check response body for error status.
     #
+    # @param [Hurley::Response] body Response object.
     # @param [Hash] body Response body.
     def check_body_error(response, body)
       case body[:status]

@@ -116,30 +116,35 @@ module GoogleMapsService::Apis
           raise GoogleMapsService::Error::ApiError.new(response), 'Received a malformed response.'
         end
 
-        if body.has_key?(:error)
-          error = body[:error]
-          status = error[:status]
-
-          case status
-            when 'INVALID_ARGUMENT'
-              if error[:message] == 'The provided API key is invalid.'
-                raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
-              end
-              raise GoogleMapsService::Error::InvalidRequestError.new(response), error[:message]
-            when 'PERMISSION_DENIED'
-              raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
-            when 'RESOURCE_EXHAUSTED'
-              raise GoogleMapsService::Error::RateLimitError.new(response), error[:message]
-            else
-              raise GoogleMapsService::Error::ApiError.new(response), error[:message]
-          end
-        end
+        check_roads_body_error(response, body)
 
         unless response.status_code == 200
           raise GoogleMapsService::Error::ApiError.new(response)
         end
-
         return body
+      end
+
+      # Check response body for error status.
+      #
+      # @param [Hurley::Response] body Response object.
+      # @param [Hash] body Response body.
+      def check_roads_body_error(response, body)
+        error = body[:error]
+        return unless error
+
+        case error[:status]
+          when 'INVALID_ARGUMENT'
+            if error[:message] == 'The provided API key is invalid.'
+              raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
+            end
+            raise GoogleMapsService::Error::InvalidRequestError.new(response), error[:message]
+          when 'PERMISSION_DENIED'
+            raise GoogleMapsService::Error::RequestDeniedError.new(response), error[:message]
+          when 'RESOURCE_EXHAUSTED'
+            raise GoogleMapsService::Error::RateLimitError.new(response), error[:message]
+          else
+            raise GoogleMapsService::Error::ApiError.new(response), error[:message]
+        end
       end
   end
 end
