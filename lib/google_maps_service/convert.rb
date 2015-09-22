@@ -23,8 +23,8 @@ module GoogleMapsService
     #
     # Accepts various representations:
     #
-    # 1. Hash with two entries - +lat+ and +lng+
-    # 2. Array or list - e.g. +[-33, 151]+
+    # 1. Hash with two entries - `lat` and `lng`
+    # 2. Array or list - e.g. `[-33, 151]`
     #
     # @param [Hash, Array] arg The lat/lon hash or array pair.
     #
@@ -136,6 +136,23 @@ module GoogleMapsService
       raise ArgumentError, "Expected a bounds (southwest/northeast) Hash, but got #{arg.class}"
     end
 
+    # Converts a waypoints to the format expected by the Google Maps server.
+    #
+    # Accept two representation of waypoint:
+    #
+    # 1. String: Name of place or comma-separated lat/lon pair.
+    # 2. Hash/Array: Lat/lon pair.
+    #
+    # @param [Array, String, Hash] waypoint Path.
+    #
+    # @return [String]
+    def waypoint(waypoint)
+      if waypoint.kind_of?(String)
+        return waypoint
+      end
+      return GoogleMapsService::Convert.latlng(waypoint)
+    end
+
     # Converts an array of waypoints (path) to the format expected by the Google Maps
     # server.
     #
@@ -153,84 +170,7 @@ module GoogleMapsService
       end
 
       waypoints = as_list(waypoints)
-      return join_list('|', waypoints.map { |k| k.kind_of?(String) ? k : latlng(k) })
+      return join_list('|', waypoints.map { |k| waypoint(k) })
     end
-
-    # Decodes a Polyline string into a list of lat/lng hash.
-    #
-    # See the developer docs for a detailed description of this encoding:
-    # https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-    #
-    # @param [String] polyline An encoded polyline
-    #
-    # @return [Array] Array of hash with lat/lng keys
-    def decode_polyline(polyline)
-      points = []
-      index = lat = lng = 0
-
-      while index < polyline.length
-        result = 1
-        shift = 0
-        while true
-          b = polyline[index].ord - 63 - 1
-          index += 1
-          result += b << shift
-          shift += 5
-          break if b < 0x1f
-        end
-        lat += (result & 1) != 0 ? (~result >> 1) : (result >> 1)
-
-        result = 1
-        shift = 0
-        while true
-          b = polyline[index].ord - 63 - 1
-          index += 1
-          result += b << shift
-          shift += 5
-          break if b < 0x1f
-        end
-        lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
-
-        points << {lat: lat * 1e-5, lng: lng * 1e-5}
-      end
-
-      points
-    end
-
-    # Encodes a list of points into a polyline string.
-    #
-    # See the developer docs for a detailed description of this encoding:
-    # https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-    #
-    # @param [Array<Hash>, Array<Array>] points A list of lat/lng pairs.
-    #
-    # @return [String]
-    def encode_polyline(points)
-      last_lat = last_lng = 0
-      result = ""
-
-      points.each do |point|
-        ll = normalize_latlng(point)
-        lat = (ll[0] * 1e5).round.to_i
-        lng = (ll[1] * 1e5).round.to_i
-        d_lat = lat - last_lat
-        d_lng = lng - last_lng
-
-        [d_lat, d_lng].each do |v|
-          v = (v < 0) ? ~(v << 1) : (v << 1)
-          while v >= 0x20
-            result += ((0x20 | (v & 0x1f)) + 63).chr
-            v >>= 5
-          end
-          result += (v + 63).chr
-        end
-
-        last_lat = lat
-        last_lng = lng
-      end
-
-      result
-    end
-
   end
 end

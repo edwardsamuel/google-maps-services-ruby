@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GoogleMapsService::TimeZone do
+describe GoogleMapsService::Apis::TimeZone do
   include_context 'HTTP client'
 
   before(:example) do
@@ -11,7 +11,7 @@ describe GoogleMapsService::TimeZone do
   context 'los angeles' do
     it 'should call Google Maps Web Service' do
       ts = 1331766000
-      timezone = client.timezone(location: [39.603481, -119.682251], timestamp: ts)
+      timezone = client.timezone([39.603481, -119.682251], timestamp: ts)
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/timezone/json?location=39.603481,-119.682251&timestamp=%d&key=%s' % [ts.to_i, api_key])).to have_been_made
     end
   end
@@ -22,7 +22,7 @@ describe GoogleMapsService::TimeZone do
     end
 
     it 'should call Google Maps Web Service' do
-      timezone = client.timezone(location: [39.603481, -119.682251])
+      timezone = client.timezone([39.603481, -119.682251])
       expect(a_request(:get, 'https://maps.googleapis.com/maps/api/timezone/json?location=39.603481,-119.682251&timestamp=%d&key=%s' % [1608, api_key])).to have_been_made
     end
   end

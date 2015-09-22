@@ -125,6 +125,22 @@ describe GoogleMapsService::Convert do
     end
   end
 
+  context '.waypoint' do
+    context 'with string' do
+      it 'should return string representation of waypoint' do
+        places = 'ABC'
+        expect(GoogleMapsService::Convert.waypoint(places)).to eq('ABC')
+      end
+    end
+
+    context 'with lat/lon pairs' do
+      it 'should return string representation of waypoints' do
+        path = {"latitude" => 1, "longitude" => 2}
+        expect(GoogleMapsService::Convert.waypoint(path)).to eq('1.000000,2.000000')
+      end
+    end
+  end
+
   context '.waypoints' do
     context 'with string' do
       it 'should return string representation of waypoints' do
@@ -158,61 +174,6 @@ describe GoogleMapsService::Convert do
       it 'should return string representation of waypoints' do
         path = [[1, 2], 'ABC', {lat: 3, lng: 4}, 'def']
         expect(GoogleMapsService::Convert.waypoints(path)).to eq('1.000000,2.000000|ABC|3.000000,4.000000|def')
-      end
-    end
-  end
-
-  context '.decode_polyline' do
-    context 'with Sydney to Melbourne polyline' do
-      let (:decoded_points) do
-        syd_mel_route = ("rvumEis{y[`NsfA~tAbF`bEj^h{@{KlfA~eA~`AbmEghAt~D|e@j" \
-                         "lRpO~yH_\\v}LjbBh~FdvCxu@`nCplDbcBf_B|wBhIfhCnqEb~D~" \
-                         "jCn_EngApdEtoBbfClf@t_CzcCpoEr_Gz_DxmAphDjjBxqCviEf}" \
-                         "B|pEvsEzbE~qGfpExjBlqCx}BvmLb`FbrQdpEvkAbjDllD|uDldD" \
-                         "j`Ef|AzcEx_Gtm@vuI~xArwD`dArlFnhEzmHjtC~eDluAfkC|eAd" \
-                         "hGpJh}N_mArrDlr@h|HzjDbsAvy@~~EdTxpJje@jlEltBboDjJdv" \
-                         "KyZpzExrAxpHfg@pmJg[tgJuqBnlIarAh}DbN`hCeOf_IbxA~uFt" \
-                         "|A|xEt_ArmBcN|sB|h@b_DjOzbJ{RlxCcfAp~AahAbqG~Gr}AerA" \
-                         "`dCwlCbaFo]twKt{@bsG|}A~fDlvBvz@tw@rpD_r@rqB{PvbHek@" \
-                         "vsHlh@ptNtm@fkD[~xFeEbyKnjDdyDbbBtuA|~Br|Gx_AfxCt}Cj" \
-                         "nHv`Ew\\lnBdrBfqBraD|{BldBxpG|]jqC`mArcBv]rdAxgBzdEb" \
-                         "{InaBzyC}AzaEaIvrCzcAzsCtfD~qGoPfeEh]h`BxiB`e@`kBxfA" \
-                         "v^pyA`}BhkCdoCtrC~bCxhCbgEplKrk@tiAteBwAxbCwuAnnCc]b" \
-                         "{FjrDdjGhhGzfCrlDruBzSrnGhvDhcFzw@n{@zxAf}Fd{IzaDnbD" \
-                         "joAjqJjfDlbIlzAraBxrB}K~`GpuD~`BjmDhkBp{@r_AxCrnAjrC" \
-                         "x`AzrBj{B|r@~qBbdAjtDnvCtNzpHxeApyC|GlfM`fHtMvqLjuEt" \
-                         "lDvoFbnCt|@xmAvqBkGreFm~@hlHw|AltC}NtkGvhBfaJ|~@riAx" \
-                         "uC~gErwCttCzjAdmGuF`iFv`AxsJftD|nDr_QtbMz_DheAf~Buy@" \
-                         "rlC`i@d_CljC`gBr|H|nAf_Fh{G|mE~kAhgKviEpaQnu@zwAlrA`" \
-                         "G~gFnvItz@j{Cng@j{D{]`tEftCdcIsPz{DddE~}PlnE|dJnzG`e" \
-                         "G`mF|aJdqDvoAwWjzHv`H`wOtjGzeXhhBlxErfCf{BtsCjpEjtD|" \
-                         "}Aja@xnAbdDt|ErMrdFh{CzgAnlCnr@`wEM~mE`bA`uD|MlwKxmB" \
-                         "vuFlhB|sN`_@fvBp`CxhCt_@loDsS|eDlmChgFlqCbjCxk@vbGxm" \
-                         "CjbMba@rpBaoClcCk_DhgEzYdzBl\\vsA_JfGztAbShkGtEhlDzh" \
-                         "C~w@hnB{e@yF}`D`_Ayx@~vGqn@l}CafC")
-        GoogleMapsService::Convert.decode_polyline(syd_mel_route)
-      end
-
-      it 'should start in Sydney' do
-        expect(decoded_points[0][:lat]).to be_within(0.000001).of(-33.86746)
-        expect(decoded_points[0][:lng]).to be_within(0.000001).of(151.207090)
-      end
-
-      it 'should end in Melbourne' do
-        expect(decoded_points[-1][:lat]).to be_within(0.000001).of(-37.814130)
-        expect(decoded_points[-1][:lng]).to be_within(0.000001).of(144.963180)
-      end
-    end
-  end
-
-  context '.encode_polyline' do
-    context 'with decoded polyline' do
-      it 'should be same as original polyline' do
-        test_polyline = ("gcneIpgxzRcDnBoBlEHzKjBbHlG`@`IkDxIi" \
-                         "KhKoMaLwTwHeIqHuAyGXeB~Ew@fFjAtIzExF")
-        points = GoogleMapsService::Convert.decode_polyline(test_polyline)
-        actual_polyline = GoogleMapsService::Convert.encode_polyline(points)
-        expect(actual_polyline).to eq (test_polyline)
       end
     end
   end
