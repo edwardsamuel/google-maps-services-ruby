@@ -2,9 +2,11 @@
 
 ## HEAD
 
-* Using required positional and optional named parameters (_breaking changes_)
+* Use required positional and optional named parameters (_breaking changes_)
 * Documentation with examples
 * Documentation using markdown syntax
+* Use OpenSSL instead Ruby-HMAC to sign url
+* Customizeable HTTP client
 * Fix QPS bug: ensure number of queue items is the given value
 
 ## 0.3.0

@@ -1,3 +1,4 @@
+require 'base64'
 require 'uri'
 
 module GoogleMapsService
@@ -12,13 +13,7 @@ module GoogleMapsService
     # @param [String] payload The payload to sign.
     #
     # @return [String] Base64-encoded HMAC-SHA1 signature
-    #
-    # @todo Use OpenSSL instead of Ruby-HMAC
     def sign_hmac(secret, payload)
-      require 'base64'
-      require 'hmac'
-      require 'hmac-sha1'
-
       secret = secret.encode('ASCII')
       payload = payload.encode('ASCII')
 
@@ -26,9 +21,8 @@ module GoogleMapsService
       raw_key = Base64.urlsafe_decode64(secret)
 
       # Create a signature using the private key and the URL
-      sha1 = HMAC::SHA1.new(raw_key)
-      sha1 << payload
-      raw_signature = sha1.digest()
+      digest = OpenSSL::Digest.new('sha1')
+      raw_signature = OpenSSL::HMAC.digest(digest, raw_key, payload)
 
       # Encode the signature into base64 for url use form.
       signature =  Base64.urlsafe_encode64(raw_signature)
