@@ -243,20 +243,15 @@ module GoogleMapsService
       when 200..300
         # Do-nothing
       when 301, 302, 303, 307
-        message = sprintf('Redirect to %s', response.header[:location])
-        raise GoogleMapsService::Error::RedirectError.new(response), message
+        raise GoogleMapsService::Error::RedirectError.new(response), sprintf('Redirect to %s', response.header[:location])
       when 401
-        message = 'Unauthorized'
-        raise GoogleMapsService::Error::ClientError.new(response), message
+        raise GoogleMapsService::Error::ClientError.new(response), 'Unauthorized'
       when 304, 400, 402...500
-        message = 'Invalid request'
-        raise GoogleMapsService::Error::ClientError.new(response), message
+        raise GoogleMapsService::Error::ClientError.new(response), 'Invalid request'
       when 500..600
-        message = 'Server error'
-        raise GoogleMapsService::Error::ServerError.new(response), message
+        raise GoogleMapsService::Error::ServerError.new(response), 'Server error'
       else
-        message = 'Unknown error'
-        raise GoogleMapsService::Error::BaseError.new(response), message
+        raise ArgumentError, 'Invalid response status code'
       end
     end
 

@@ -11,7 +11,9 @@ module GoogleMapsService
     # @param [String] secret The key used for the signature, base64 encoded.
     # @param [String] payload The payload to sign.
     #
-    # @return [String]
+    # @return [String] Base64-encoded HMAC-SHA1 signature
+    #
+    # @todo Use OpenSSL instead of Ruby-HMAC
     def sign_hmac(secret, payload)
       require 'base64'
       require 'hmac'
@@ -40,9 +42,6 @@ module GoogleMapsService
       unquote_unreserved(URI.encode_www_form(params))
     end
 
-    # The unreserved URI characters (RFC 3986)
-    UNRESERVED_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-
     # Un-escape any percent-escape sequences in a URI that are unreserved
     # characters. This leaves all reserved, illegal and non-ASCII bytes encoded.
     #
@@ -55,20 +54,17 @@ module GoogleMapsService
       (1..parts.length-1).each do |i|
         h = parts[i][0..1]
 
-        if h.length == 2 and !h.match(/[^A-Za-z0-9]/)
-          c = h.to_i(16).chr
-
-          if UNRESERVED_SET.include?(c)
-            parts[i] = c + parts[i][2..-1]
-          else
-            parts[i] = "%#{parts[i]}"
-          end
+        if h =~ /^([\h]{2})(.*)/ and c = $1.to_i(16).chr and UNRESERVED_SET.include?(c)
+          parts[i] = c + $2
         else
-          parts[i] = "%#{parts[i]}"
+          parts[i] = '%' + parts[i]
         end
       end
 
-      return parts.join
+      parts.join
     end
+
+    # The unreserved URI characters (RFC 3986)
+    UNRESERVED_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
   end
 end

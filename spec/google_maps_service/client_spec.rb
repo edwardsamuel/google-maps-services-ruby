@@ -29,6 +29,24 @@ describe GoogleMapsService::Client do
     end
   end
 
+  context 'with global parameters' do
+    before(:example) do
+      GoogleMapsService.configure do |config|
+        config.key = 'AIZaGLOBAL'
+      end
+    end
+
+    it 'should take global parameters' do
+      client = GoogleMapsService::Client.new
+      expect(client.key).to eq('AIZaGLOBAL')
+    end
+
+    after(:example) do
+      GoogleMapsService.configure do |config|
+        config.key = nil
+      end
+    end
+  end
 
   context 'with client id and secret' do
     let(:client) do
@@ -46,69 +64,71 @@ describe GoogleMapsService::Client do
     end
   end
 
-  context 'without api key and client secret pair' do
-    it 'should raise ArgumentError' do
-      client = GoogleMapsService::Client.new
-      expect { client.directions("Sydney", "Melbourne") }.to raise_error ArgumentError
-    end
-  end
-
-  context 'with invalid api key' do
-    let(:client) do
-      client = GoogleMapsService::Client.new(key: "AIzaINVALID")
+  context 'error handling' do
+    context 'without api key and client secret pair' do
+      it 'should raise ArgumentError' do
+        client = GoogleMapsService::Client.new
+        expect { client.directions("Sydney", "Melbourne") }.to raise_error ArgumentError
+      end
     end
 
-    before(:example) do
-      json = <<EOF
+    context 'with invalid api key' do
+      let(:client) do
+        client = GoogleMapsService::Client.new(key: "AIzaINVALID")
+      end
+
+      before(:example) do
+        json = <<EOF
 {
   "error_message": "The provided API key is invalid.",
   "routes": [],
   "status": "REQUEST_DENIED"
 }
 EOF
-      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/.*/)
-        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: json)
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/.*/)
+          .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: json)
+      end
+
+      it 'should raise GoogleMapsService::Error::RequestDeniedError' do
+        expect { client.directions("Sydney", "Melbourne") }.to raise_error GoogleMapsService::Error::RequestDeniedError
+      end
     end
 
-    it 'should raise GoogleMapsService::Error::RequestDeniedError' do
-      expect { client.directions("Sydney", "Melbourne") }.to raise_error GoogleMapsService::Error::RequestDeniedError
-    end
-  end
+    context 'with over query limit' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OVER_QUERY_LIMIT"}').then
+          .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+      end
 
-  context 'with over query limit' do
-    before(:example) do
-      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
-        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OVER_QUERY_LIMIT"}').then
-        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
-    end
-
-    it 'should make request twice' do
-      results = client.geocode('Sydney')
-      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
-    end
-  end
-
-  context 'with server error' do
-    before(:example) do
-      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
-        .to_return(:status => 500, body: 'Internal server error.').then
-        .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+      it 'should make request twice' do
+        results = client.geocode('Sydney')
+        expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
+      end
     end
 
-    it 'should make request twice' do
-      results = client.geocode('Sydney')
-      expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
-    end
-  end
+    context 'with server error and then success' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 500, body: 'Internal server error.').then
+          .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"OK","results":[]}')
+      end
 
-  context 'with connection failed' do
-    before(:example) do
-      stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
-        .to_raise(Hurley::ConnectionFailed)
+      it 'should make request twice' do
+        results = client.geocode('Sydney')
+        expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
+      end
     end
 
-    it 'should raise Hurley::ConnectionFailed' do
-      expect { client.geocode(address: 'Sydney') }.to raise_error Hurley::ConnectionFailed
+    context 'with connection failed' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_raise(Hurley::ConnectionFailed)
+      end
+
+      it 'should raise Hurley::ConnectionFailed' do
+        expect { client.geocode(address: 'Sydney') }.to raise_error Hurley::ConnectionFailed
+      end
     end
   end
 end

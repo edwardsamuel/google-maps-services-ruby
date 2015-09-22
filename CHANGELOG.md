@@ -5,6 +5,7 @@
 * Using required positional and optional named parameters (_breaking changes_)
 * Documentation with examples
 * Documentation using markdown syntax
+* Fix QPS bug: ensure number of queue items is the given value
 
 ## 0.3.0
 
