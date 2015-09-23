@@ -21,13 +21,16 @@ The Ruby gem for Google Maps Web Service APIs is a gem for the following Google 
  - [Google Maps Time Zone API][Time Zone API]
  - [Google Maps Roads API][Roads API]
 
-This gem return a Ruby Hash/Array object of the result. The result format can be read in each API documentation.
-
 Keep in mind that the same [terms and conditions](https://developers.google.com/maps/terms) apply
 to usage of the APIs when they're accessed through this gem.
 
 
 ## Features
+
+### Rate Limiting
+
+Never sleep between requests again! By default, requests are sent at the expected rate limits for
+each web service, typically 10 queries per second for free users. If you want to speed up or slowdown requests, you can do that too, using `queries_per_second` options while initializing API client.
 
 ### Retry on Failure
 
@@ -40,6 +43,10 @@ Maps API for Work customers can use their [client ID and secret][clientid] to au
 customers can use their [API key][apikey], too.
 
 Note: Currently, [Roads API] does not accept client ID. It requires API key to authenticate the request.
+
+### Ruby Hash/Array as API Result
+
+This gem return a Ruby Hash/Array object as the API result. The result format structure is same as in Google Maps API documentation.
 
 ## Requirements
 

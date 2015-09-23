@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 0.4.0
 
 * Use required positional and optional named parameters (_breaking changes_)
 * Documentation with examples
