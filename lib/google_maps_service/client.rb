@@ -94,8 +94,6 @@ module GoogleMapsService
     #      connection: Hurley::HttpCache.new(HurleyExcon::Connection.new)
     #  )
     #
-    #
-    #
     # @option options [String] :key Secret key for accessing Google Maps Web Service.
     #   Can be obtained at https://developers.google.com/maps/documentation/geocoding/get-api-key#key.
     # @option options [String] :client_id Client id for using Maps API for Work services.
@@ -111,17 +109,13 @@ module GoogleMapsService
     #     By default, the default Hurley's HTTP client connection (Net::Http) will be used.
     #     See https://github.com/lostisland/hurley/blob/master/README.md#connections.
     def initialize(**options)
-      @key = options[:key] || GoogleMapsService.key
-      @client_id = options[:client_id] || GoogleMapsService.client_id
-      @client_secret = options[:client_secret] || GoogleMapsService.client_secret
-      @retry_timeout = options[:retry_timeout] || GoogleMapsService.retry_timeout || 60
-      @queries_per_second = options[:queries_per_second] || GoogleMapsService.queries_per_second
-      @request_options = options[:request_options] || GoogleMapsService.request_options
-      @ssl_options = options[:ssl_options] || GoogleMapsService.ssl_options
-      @connection = options[:connection] || GoogleMapsService.connection
+      [:key, :client_id, :client_secret,
+          :retry_timeout, :queries_per_second,
+          :request_options, :ssl_options, :connection].each do |key|
+        self.instance_variable_set("@#{key}".to_sym, options[key] || GoogleMapsService.instance_variable_get("@#{key}"))
+      end
 
-      #
-      initialize_qps if @queries_per_second
+      initialize_query_tickets
     end
 
     # Get the current HTTP client.
@@ -133,10 +127,12 @@ module GoogleMapsService
     protected
 
     # Initialize QPS queue. QPS queue is a "tickets" for calling API
-    def initialize_qps
-      @qps_queue = SizedQueue.new @queries_per_second
-      @queries_per_second.times do
-        @qps_queue << 0
+    def initialize_query_tickets
+      if @queries_per_second
+        @qps_queue = SizedQueue.new @queries_per_second
+        @queries_per_second.times do
+          @qps_queue << 0
+        end
       end
     end
 
@@ -175,23 +171,34 @@ module GoogleMapsService
       url = base_url + generate_auth_url(path, params, accepts_client_id)
 
       Retriable.retriable timeout: @retry_timeout, on: RETRIABLE_ERRORS do |try|
-        # Get/wait the request "ticket" if QPS is configured
-        # Check for previous request time, it must be more than a second ago before calling new request
-        if @qps_queue
-          elapsed_since_earliest = Time.now - @qps_queue.pop
-          sleep(1 - elapsed_since_earliest) if elapsed_since_earliest.to_f < 1
-        end
-
         begin
+          request_query_ticket
           response = client.get url
         ensure
-          # Release request "ticket"
-          @qps_queue << Time.now if @qps_queue
+          release_query_ticket
         end
 
         return custom_response_decoder.call(response) if custom_response_decoder
         decode_response_body(response)
       end
+    end
+
+    # Get/wait the request "ticket" if QPS is configured.
+    # Check for previous request time, it must be more than a second ago before calling new request.
+    #
+    # @return [void]
+    def request_query_ticket
+      if @qps_queue
+        elapsed_since_earliest = Time.now - @qps_queue.pop
+        sleep(1 - elapsed_since_earliest) if elapsed_since_earliest.to_f < 1
+      end
+    end
+
+    # Release request "ticket".
+    #
+    # @return [void]
+    def release_query_ticket
+      @qps_queue << Time.now if @qps_queue
     end
 
     # Returns the path and query string portion of the request URL,
