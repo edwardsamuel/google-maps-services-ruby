@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+* Support JRuby 9.0.0.0
+
 ## 0.4.0
 
 * Use required positional and optional named parameters (_breaking changes_)
