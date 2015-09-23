@@ -20,13 +20,5 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'multi_json', '~> 1.11'
   spec.add_runtime_dependency 'hurley', '~> 0.1'
-  spec.add_runtime_dependency 'retriable', '~> 2.0', '>= 2.0.2'
-  spec.add_development_dependency 'bundler', '~> 1.7'
-  spec.add_development_dependency 'rake', '~> 10.0'
-  spec.add_development_dependency 'yard', '~> 0.8.7.6'
-  spec.add_development_dependency 'redcarpet', '~> 3.3'
-  spec.add_development_dependency 'rspec', '~> 3.3'
-  spec.add_development_dependency 'simplecov', '~> 0.10.0'
-  spec.add_development_dependency 'coveralls', '~> 0.8.2'
-  spec.add_development_dependency 'webmock', '~> 1.21', '>= 1.21.0'
+  spec.add_runtime_dependency 'retriable', '~> 2.0'
 end

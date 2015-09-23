@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+* Support JRuby 9.0.0.0
+* Refactoring and more test coverage
+
 ## 0.4.0
 
 * Use required positional and optional named parameters (_breaking changes_)

@@ -107,6 +107,17 @@ EOF
       end
     end
 
+    context 'with unknown api error' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"status":"UNKNOWN_ERROR"}')
+      end
+
+      it 'should raise GoogleMapsService::Error::ApiError' do
+        expect { client.geocode('Sydney') }.to raise_error GoogleMapsService::Error::ApiError
+      end
+    end
+
     context 'with server error and then success' do
       before(:example) do
         stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
@@ -117,6 +128,50 @@ EOF
       it 'should make request twice' do
         results = client.geocode('Sydney')
         expect(a_request(:get, 'https://maps.googleapis.com/maps/api/geocode/json?key=%s&address=Sydney' % api_key)).to have_been_made.times(2)
+      end
+    end
+
+    context 'with server error' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 500, body: 'Internal server error.')
+      end
+
+      it 'should raise GoogleMapsService::Error::ServerError' do
+        expect { client.geocode('Sydney') }.to raise_error GoogleMapsService::Error::ServerError
+      end
+    end
+
+    context 'with unauthorized status code error' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 401, body: 'Unauthorized.')
+      end
+
+      it 'should raise GoogleMapsService::Error::ClientError' do
+        expect { client.geocode('Sydney') }.to raise_error GoogleMapsService::Error::ClientError
+      end
+    end
+
+    context 'with client error' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 400, body: 'Bad request.')
+      end
+
+      it 'should raise GoogleMapsService::Error::ClientError' do
+        expect { client.geocode('Sydney') }.to raise_error GoogleMapsService::Error::ClientError
+      end
+    end
+
+    context 'with redirect error' do
+      before(:example) do
+        stub_request(:get, /https:\/\/maps.googleapis.com\/maps\/api\/geocode\/.*/)
+          .to_return(:status => 301, headers: { 'location' => 'https://maps2.googleapis.com' } )
+      end
+
+      it 'should raise GoogleMapsService::Error::RedirectError' do
+        expect { client.geocode('Sydney') }.to raise_error GoogleMapsService::Error::RedirectError
       end
     end
 

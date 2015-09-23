@@ -7,6 +7,9 @@ module GoogleMapsService
       # @return [Hurley::Response]
       attr_reader :response
 
+      # Initialize error
+      #
+      # @param [Hurley::Response] response HTTP response.
       def initialize(response = nil)
         @response = response
       end

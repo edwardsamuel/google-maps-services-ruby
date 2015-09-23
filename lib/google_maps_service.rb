@@ -42,6 +42,8 @@ module GoogleMapsService
     # @return [Object]
     attr_accessor :connection
 
+    # Configure global parameters.
+    # @yield [config]
     def configure
       yield self
       true
