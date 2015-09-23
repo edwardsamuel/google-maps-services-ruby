@@ -140,13 +140,14 @@ module GoogleMapsService
     # @return [Hurley::Client]
     def new_client
       client = Hurley::Client.new
+      client.request_options.query_class = Hurley::Query::Flat
+      client.request_options.redirection_limit = 0
+      client.header[:user_agent] = user_agent
 
       client.connection = @connection if @connection
       @request_options.each_pair {|key, value| client.request_options[key] = value } if @request_options
       @ssl_options.each_pair {|key, value| client.ssl_options[key] = value } if @ssl_options
 
-      client.request_options.query_class = Hurley::Query::Flat
-      client.header[:user_agent] = user_agent
       client
     end
 
@@ -261,8 +262,6 @@ module GoogleMapsService
         raise GoogleMapsService::Error::ClientError.new(response), 'Invalid request'
       when 500..600
         raise GoogleMapsService::Error::ServerError.new(response), 'Server error'
-      else
-        raise ArgumentError, 'Invalid response status code'
       end
     end
 
