@@ -126,7 +126,7 @@ module GoogleMapsService::Apis
 
       # Check response body for error status.
       #
-      # @param [Hurley::Response] body Response object.
+      # @param [Hurley::Response] response Response object.
       # @param [Hash] body Response body.
       def check_roads_body_error(response, body)
         error = body[:error]

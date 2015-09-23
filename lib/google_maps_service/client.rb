@@ -199,6 +199,7 @@ module GoogleMapsService
     #
     # @param [String] path The path portion of the URL.
     # @param [Hash] params URL parameters.
+    # @param [Boolean] accepts_client_id Sign the request using API {#keys} instead of {#client_id}.
     #
     # @return [String]
     def generate_auth_url(path, params, accepts_client_id)
@@ -260,8 +261,10 @@ module GoogleMapsService
 
     # Check response body for error status.
     #
-    # @param [Hurley::Response] body Response object.
+    # @param [Hurley::Response] response Response object.
     # @param [Hash] body Response body.
+    #
+    # @return [void]
     def check_body_error(response, body)
       case body[:status]
       when 'OK', 'ZERO_RESULTS'
