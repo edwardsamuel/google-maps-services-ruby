@@ -57,13 +57,15 @@ module GoogleMapsService::Apis
     #     `rail` is equivalent to `["train", "tram", "subway"]`.
     # @param [String] transit_routing_preference Specifies preferences for transit
     #     requests. Valid values are `less_walking` or `fewer_transfers`.
+    # @param [String] traffic_model Specifies the predictive travel time model to use.
+    #    The valid values are `best_guess`, `optimistic` or `pessimistic`.
     #
     # @return [Array] Array of routes.
     def directions(origin, destination,
         mode: nil, waypoints: nil, alternatives: false, avoid: nil,
         language: nil, units: nil, region: nil, departure_time: nil,
         arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
-        transit_routing_preference: nil)
+        transit_routing_preference: nil, traffic_model: nil)
 
       params = {
         origin: GoogleMapsService::Convert.waypoint(origin),
@@ -94,6 +96,7 @@ module GoogleMapsService::Apis
 
       params[:transit_mode] = GoogleMapsService::Convert.join_list("|", transit_mode) if transit_mode
       params[:transit_routing_preference] = transit_routing_preference if transit_routing_preference
+      params[:traffic_model] = traffic_model if traffic_model
 
       return get('/maps/api/directions/json', params)[:routes]
     end
