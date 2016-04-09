@@ -1,5 +1,4 @@
 module GoogleMapsService
-
   # Converts Ruby types to string representations suitable for Maps API server.
   module Convert
     module_function
@@ -7,7 +6,9 @@ module GoogleMapsService
     # Converts a lat/lon pair to a comma-separated string.
     #
     # @example
-    #   >> GoogleMapsService::Convert.latlng({"lat": -33.8674869, "lng": 151.2069902})
+    #   >> GoogleMapsService::Convert.latlng(
+    #        { lat: -33.8674869, lng: 151.2069902}
+    #      )
     #   => "-33.867487,151.206990"
     #
     # @param [Hash, Array] arg The lat/lon hash or array pair.
@@ -16,7 +17,8 @@ module GoogleMapsService
     #
     # @raise [ArgumentError] When argument is not lat/lng hash or array.
     def latlng(arg)
-      return "%f,%f" % normalize_latlng(arg)
+      lat, lng = normalize_latlng(arg)
+      format('%.6f,%.6f', lat, lng)
     end
 
     # Take the various lat/lng representations and return a tuple.
@@ -30,25 +32,35 @@ module GoogleMapsService
     #
     # @return [Array] Pair of lat and lng array.
     def normalize_latlng(arg)
-      if arg.kind_of?(Hash)
-        lat = arg[:lat] || arg[:latitude] || arg["lat"] || arg["latitude"]
-        lng = arg[:lng] || arg[:longitude] || arg["lng"] || arg["longitude"]
-        return lat, lng
-      elsif arg.kind_of?(Array)
-        return arg[0], arg[1]
+      if arg.is_a?(Hash)
+        lat = find_by_priority(arg, :lat, :latitude, 'lat', 'latitude')
+        lng = find_by_priority(arg, :lng, :longitude, 'lng', 'longitude')
+        return [lat, lng]
+      elsif arg.is_a?(Array)
+        return arg[0..1]
       end
 
-      raise ArgumentError, "Expected a lat/lng Hash or Array, but got #{arg.class}"
+      raise ArgumentError,
+            "Expected a lat/lng Hash or Array, but got #{arg.class}"
     end
 
-    # If arg is list-like, then joins it with sep.
+    # Find non-nil value in a Hash if any from keys those are ordered
+    # by priority
     #
-    # @param [String] sep Separator string.
+    # @param [Array] keys Hash keys order by priority
+    #
+    # @return [String] Non-nil Hash value if any
+    def find_by_priority(hash, *keys)
+      hash[keys.detect { |k| hash[k] }]
+    end
+
+    # If arg is list-like, then joins it with `|`.
+    #
     # @param [Array, String] arg Value to coerce into a list.
     #
     # @return [String]
-    def join_list(sep, arg)
-      return as_list(arg).join(sep)
+    def join_list(arg)
+      as_list(arg).join('|')
     end
 
     # Coerces arg into a list. If arg is already list-like, returns arg.
@@ -58,12 +70,9 @@ module GoogleMapsService
     #
     # @return [Array]
     def as_list(arg)
-      if arg.kind_of?(Array)
-          return arg
-      end
-      return [arg]
+      return arg if arg.is_a?(Array)
+      [arg]
     end
-
 
     # Converts the value into a unix time (seconds since unix epoch).
     #
@@ -75,29 +84,26 @@ module GoogleMapsService
     #
     # @return [String] String representation of epoch time
     def time(arg)
-      if arg.kind_of?(DateTime)
-        arg = arg.to_time
-      end
-      return arg.to_i.to_s
+      arg = arg.to_time if arg.is_a?(DateTime)
+      arg.to_i.to_s
     end
 
     # Converts a dict of components to the format expected by the Google Maps
     # server.
     #
     # @example
-    #   >> GoogleMapsService::Convert.components({"country": "US", "postal_code": "94043"})
+    #   >> GoogleMapsService::Convert.components(
+    #        { 'country': 'US', 'postal_code': '94043' }
+    #      )
     #   => "country:US|postal_code:94043"
     #
     # @param [Hash] arg The component filter.
     #
     # @return [String]
     def components(arg)
-      if arg.kind_of?(Hash)
-        arg = arg.sort.map { |k, v| "#{k}:#{v}" }
-        return arg.join("|")
-      end
-
-      raise ArgumentError, "Expected a Hash for components, but got #{arg.class}"
+      return arg.sort.map { |k, v| "#{k}:#{v}" }.join('|') if arg.is_a?(Hash)
+      raise ArgumentError,
+            "Expected a Hash for components, but got #{arg.class}"
     end
 
     # Converts a lat/lon bounds to a comma- and pipe-separated string.
@@ -111,29 +117,30 @@ module GoogleMapsService
     # For example:
     #
     #   >> sydney_bounds = {
-    #   ?>   "northeast": {
-    #   ?>     "lat": -33.4245981,
-    #   ?>     "lng": 151.3426361
+    #   ?>   'northeast': {
+    #   ?>     'lat': -33.4245981,
+    #   ?>     'lng': 151.3426361
     #   ?>   },
-    #   ?>   "southwest": {
-    #   ?>     "lat": -34.1692489,
-    #   ?>     "lng": 150.502229
+    #   ?>   'southwest': {
+    #   ?>     'lat': -34.1692489,
+    #   ?>     'lng': 150.502229
     #   ?>   }
     #   ?> }
     #   >> GoogleMapsService::Convert.bounds(sydney_bounds)
-    #   => '-34.169249,150.502229|-33.424598,151.342636'
+    #   => "-34.169249,150.502229|-33.424598,151.342636"
     #
     # @param [Hash] arg The bounds.
     #
     # @return [String]
     def bounds(arg)
-      if arg.kind_of?(Hash)
-        southwest = arg[:southwest] || arg["southwest"]
-        northeast = arg[:northeast] || arg["northeast"]
+      if arg.is_a?(Hash)
+        southwest = arg[:southwest] || arg['southwest']
+        northeast = arg[:northeast] || arg['northeast']
         return "#{latlng(southwest)}|#{latlng(northeast)}"
       end
 
-      raise ArgumentError, "Expected a bounds (southwest/northeast) Hash, but got #{arg.class}"
+      raise ArgumentError,
+            "Expected a bounds (southwest/northeast) Hash, but got #{arg.class}"
     end
 
     # Converts a waypoints to the format expected by the Google Maps server.
@@ -147,14 +154,12 @@ module GoogleMapsService
     #
     # @return [String]
     def waypoint(waypoint)
-      if waypoint.kind_of?(String)
-        return waypoint
-      end
-      return GoogleMapsService::Convert.latlng(waypoint)
+      return waypoint if waypoint.is_a?(String)
+      GoogleMapsService::Convert.latlng(waypoint)
     end
 
-    # Converts an array of waypoints (path) to the format expected by the Google Maps
-    # server.
+    # Converts an array of waypoints (path) to the format expected by
+    # Google Maps server.
     #
     # Accept two representation of waypoint:
     #
@@ -165,12 +170,11 @@ module GoogleMapsService
     #
     # @return [String]
     def waypoints(waypoints)
-      if waypoints.kind_of?(Array) and waypoints.length == 2 and waypoints[0].kind_of?(Numeric) and waypoints[1].kind_of?(Numeric)
+      if waypoints.is_a?(Array) && waypoints.length == 2 &&
+         waypoints[0].is_a?(Numeric) && waypoints[1].is_a?(Numeric)
         waypoints = [waypoints]
       end
-
-      waypoints = as_list(waypoints)
-      return join_list('|', waypoints.map { |k| waypoint(k) })
+      join_list(as_list(waypoints).map { |k| waypoint(k) })
     end
   end
 end

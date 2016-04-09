@@ -45,7 +45,8 @@ module GoogleMapsService
     class RateLimitError < ApiError
     end
 
-    # An unathorized error occurred. It might be caused by invalid key/secret or invalid access.
+    # An unathorized error occurred. It might be caused by invalid key/secret or
+    # invalid access.
     class RequestDeniedError < ApiError
     end
   end

@@ -1,7 +1,6 @@
 # Google Maps Web Service API.
 module GoogleMapsService
   class << self
-
     # Global key.
     # @see Client#key
     # @return [String]

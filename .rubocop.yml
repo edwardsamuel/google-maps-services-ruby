@@ -1,0 +1,9 @@
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  Exclude:
+    - 'spec/**/*'
+    - 'lib/google_maps_service/polyline.rb'
+
+Metrics/LineLength:
+  Max: 80

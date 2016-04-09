@@ -1,12 +1,13 @@
 require_relative './convert'
 
 module GoogleMapsService
-
   # Validate value that is accepted by Google Maps.
   module Validator
     module_function
 
-    # Validate travel mode. The valid value of travel mode are `driving`, `walking`, `bicycling` or `transit`.
+    # Validate travel mode.
+    # The valid value of travel mode are `driving`, `walking`, `bicycling`
+    # or `transit`.
     #
     # @param [String, Symbol] mode Travel mode to be validated.
     #
@@ -22,7 +23,8 @@ module GoogleMapsService
       mode
     end
 
-    # Validate route restriction. The valid value of route restriction are `tolls`, `highways` or `ferries`.
+    # Validate route restriction.
+    # The valid value of route restriction are `tolls`, `highways` or `ferries`.
     #
     # @param [String, Symbol] avoid Route restriction to be validated.
     #

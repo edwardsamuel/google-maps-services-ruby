@@ -9,12 +9,15 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Edward Samuel Pasaribu']
   spec.email         = ['edwardsamuel92@gmail.com']
 
-  spec.summary       = %q{Ruby gem for Google Maps Web Service APIs }
-  spec.homepage      = %q{https://github.com/edwardsamuel/google-maps-services-ruby}
+  spec.summary       = 'Ruby gem for Google Maps Web Service APIs'
+  spec.homepage      = 'https://github.com/edwardsamuel/google-maps-services-ruby'
   spec.license       = 'Apache-2.0'
   spec.required_ruby_version = '>= 2.0.0'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.files = `git ls-files -z`.split("\x0")
+                                .reject do |f|
+                                  f.match(%r{^(test|spec|features)/})
+                                end
   spec.require_paths = ['lib']
   spec.has_rdoc      = 'yard'
 

@@ -2,10 +2,34 @@ require 'base64'
 require 'uri'
 
 module GoogleMapsService
-
   # Helper for handling URL.
   module Url
     module_function
+
+    # Returns the path and query string portion of the request URL,
+    # first adding any necessary parameters.
+    #
+    # @param [String] path The path portion of the URL.
+    # @param [Hash] params URL parameters.
+    # @param [Boolean] accepts_client_id Sign the request using API {#keys}
+    #   instead of {#client_id}.
+    #
+    # @return [String]
+    def generate_auth_url(path, params, accepts_client_id)
+      # Deterministic ordering through sorting by key.
+      # Useful for tests, and in the future, any caching.
+      params = if params.is_a?(Hash)
+                 params.sort
+               else
+                 params.dup
+               end
+
+      return build_client_id_url(path, params) if accepts_client_id &&
+                                                  @client_id && @client_secret
+      return build_api_key_url(path, params) if @key
+      raise ArgumentError, 'Must provide API key for this API.' \
+            'It does not accept enterprise credentials.'
+    end
 
     # Returns a base64-encoded HMAC-SHA1 signature of a given string.
     #
@@ -25,8 +49,7 @@ module GoogleMapsService
       raw_signature = OpenSSL::HMAC.digest(digest, raw_key, payload)
 
       # Encode the signature into base64 for url use form.
-      signature =  Base64.urlsafe_encode64(raw_signature)
-      return signature
+      Base64.urlsafe_encode64(raw_signature)
     end
 
     # URL encodes the parameters.
@@ -45,20 +68,38 @@ module GoogleMapsService
     def unquote_unreserved(uri)
       parts = uri.split('%')
 
-      (1..parts.length-1).each do |i|
-        h = parts[i][0..1]
-
-        if h =~ /^([\h]{2})(.*)/ and c = $1.to_i(16).chr and UNRESERVED_SET.include?(c)
-          parts[i] = c + $2
-        else
-          parts[i] = '%' + parts[i]
-        end
+      (1..parts.length - 1).each do |i|
+        parts[i] = unquote_part(parts[i])
       end
 
       parts.join
     end
 
+    def unquote_part(str)
+      /^(?<w1>[\h]{2})(?<w2>.*)/ =~ str[0..1]
+      if UNRESERVED_SET.include?(w1.to_i(16).chr)
+        w1.to_i(16).chr + w2
+      else
+        '%' + str
+      end
+    end
+
     # The unreserved URI characters (RFC 3986)
-    UNRESERVED_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
+    UNRESERVED_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' \
+                     'abcdefghijklmnopqrstuvwxyz' \
+                     '0123456789-._~'.freeze
+
+    protected
+
+    def build_client_id_url(path, params)
+      params << ['client', @client_id]
+      path = [path, urlencode_params(params)].join('?')
+      "#{path}&signature=#{sign_hmac(@client_secret, path)}"
+    end
+
+    def build_api_key_url(path, params)
+      params << ['key', @key]
+      "#{path}?#{urlencode_params(params)}"
+    end
   end
 end

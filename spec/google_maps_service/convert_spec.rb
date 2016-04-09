@@ -24,19 +24,19 @@ describe GoogleMapsService::Convert do
   context '.join_list' do
     context 'with a single value array' do
       it 'should return its value' do
-        expect(GoogleMapsService::Convert.join_list("|", "asdf")).to eq("asdf")
+        expect(GoogleMapsService::Convert.join_list("asdf")).to eq("asdf")
       end
     end
 
     context 'with a multiple values array' do
       it 'should return separated value string' do
-        expect(GoogleMapsService::Convert.join_list(",", ["1", "2", "A"])).to eq("1,2,A")
+        expect(GoogleMapsService::Convert.join_list(["1", "2", "A"])).to eq("1|2|A")
       end
     end
 
     context 'with an empty array' do
       it 'should return empty string' do
-        expect(GoogleMapsService::Convert.join_list(",", [])).to eq("")
+        expect(GoogleMapsService::Convert.join_list([])).to eq("")
       end
     end
   end

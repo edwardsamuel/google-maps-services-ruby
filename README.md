@@ -6,6 +6,10 @@
 
 *This gem is ported from [Python Client for Google Maps Services](https://github.com/googlemaps/google-maps-services-python).*
 
+## DEVELOP BRANCH: ON LARGE REFACTORING
+
+The `develop` branch currently is on refactoring. This branch might be **broken**.
+
 ## Description
 
 Use Ruby? Want to [geocode][Geocoding API] something? Looking for [directions][Directions API]?

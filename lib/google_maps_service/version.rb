@@ -1,6 +1,6 @@
 module GoogleMapsService
   # GoogleMapsService gem version
-  VERSION = '0.4.1'
+  VERSION = '0.4.2'.freeze
 
   # Current operating system
   # @private
@@ -8,14 +8,14 @@ module GoogleMapsService
     if RUBY_PLATFORM =~ /mswin|win32|mingw|bccwin|cygwin/
       `ver`.sub(/\s*\[Version\s*/, '/').sub(']', '').strip
     elsif RUBY_PLATFORM =~ /darwin/i
-      "Mac OS X/#{`sw_vers -productVersion`}"
+      "Mac OS X/#{`sw_vers -productVersion`}".strip
     elsif RUBY_PLATFORM == 'java'
       require 'java'
       name = java.lang.System.getProperty('os.name')
       version = java.lang.System.getProperty('os.version')
-      "#{name}/#{version}"
+      "#{name}/#{version}".strip
     else
-      `uname -sr`.sub(' ', '/')
+      `uname -sr`.sub(' ', '/').strip
     end
   rescue
     RUBY_PLATFORM
