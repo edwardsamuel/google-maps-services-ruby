@@ -3,7 +3,7 @@ require 'uri'
 
 module GoogleMapsService
   # Helper for handling URL.
-  module Url
+  module UrlHelper
     module_function
 
     # Returns the path and query string portion of the request URL,

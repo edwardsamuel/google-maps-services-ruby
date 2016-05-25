@@ -4,7 +4,7 @@ require 'thread'
 
 require_relative './errors'
 require_relative './convert'
-require_relative './url'
+require_relative './url_helper'
 require_relative './response_handlers/default'
 require_relative './apis'
 
@@ -22,7 +22,7 @@ module GoogleMapsService
     ].freeze
 
     include Apis
-    include Url
+    include UrlHelper
 
     # Secret key for accessing Google Maps Web Service.
     # Can be obtained at

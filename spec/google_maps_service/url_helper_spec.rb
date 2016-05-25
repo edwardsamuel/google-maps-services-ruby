@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe GoogleMapsService::Url do
+describe GoogleMapsService::UrlHelper do
   context '.urlencode' do
     it 'should only encode non-reserved characters' do
-      encoded_params = GoogleMapsService::Url.urlencode_params([["address", "=Sydney ~"]])
+      encoded_params = GoogleMapsService::UrlHelper.urlencode_params([["address", "=Sydney ~"]])
       expect(encoded_params).to eq("address=%3DSydney+~")
     end
   end
@@ -19,7 +19,7 @@ describe GoogleMapsService::Url do
       key = "a2V5" # "key" -> base64
       signature = "3nybhbi3iqa8ino29wqQcBydtNk="
 
-      expect(GoogleMapsService::Url.sign_hmac(key, message)).to eq(signature)
+      expect(GoogleMapsService::UrlHelper.sign_hmac(key, message)).to eq(signature)
     end
   end
 end
