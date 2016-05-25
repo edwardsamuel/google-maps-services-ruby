@@ -14,19 +14,17 @@ module GoogleMapsService
       end
 
       def convert(params, *keys, **options)
-        converter = GoogleMapsService::Convert
-        keys.each do |key|
-          if params[key]
-            params[key] = converter.send(options[:with], params[key])
-          end
-        end
+        assigner(GoogleMapsService::Convert, params, keys, options)
       end
 
       def validate(params, *keys, **options)
-        validator = GoogleMapsService::Validator
+        assigner(GoogleMapsService::Validator, params, keys, options)
+      end
+
+      def assigner(modifier, params, keys, options)
         keys.each do |key|
           if params[key]
-            params[key] = validator.send(options[:with], params[key])
+            params[key] = modifier.send(options[:with], params[key])
           end
         end
       end
