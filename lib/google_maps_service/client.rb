@@ -1,4 +1,4 @@
-require 'hurley'
+require 'httpclient'
 require 'retriable'
 require 'thread'
 
@@ -51,12 +51,11 @@ module GoogleMapsService
 
     # Construct Google Maps Web Service API client.
     #
-    # This gem uses [Hurley](https://github.com/lostisland/hurley) as internal
+    # This gem uses [HTTPClient](https://github.com/nahi/httpclient) as internal
     # HTTP client.
-    # You can configure `Hurley::Client` through `request_options` and
-    # `ssl_options` parameters.
-    # You can also directly get the `Hurley::Client` object via
-    # {#client} method.
+    # You can access directly and configure `HTTPClient` instance
+    # through {#raw_client}. Read more about `HTTPClient` in
+    # http://www.rubydoc.info/gems/httpclient/HTTPClient.
     #
     # @example Setup API keys
     #   gmaps = Client.new(key: 'Add your key here')
@@ -75,23 +74,14 @@ module GoogleMapsService
     #   )
     #
     # @example Request behind proxy
-    #   request_options = Hurley::RequestOptions.new
-    #   request_options.proxy =
-    #     Hurley::Url.parse 'http://user:password@proxy.example.com:3128'
+    #   gmaps = Client.new(key: 'Add your key here')
+    #   gmaps.raw_client.proxy = 'http://user:password@proxy.example.com:3128'
     #
-    #   gmaps = Client.new(
-    #       key: 'Add your key here',
-    #       request_options: request_options
-    #   )
-    #
-    # @example Using Excon and Http Cache
-    #  require 'hurley-excon'       # https://github.com/lostisland/hurley-excon
-    #  require 'hurley/http_cache'  # https://github.com/plataformatec/hurley-http-cache
-    #
-    #  gmaps = Client.new(
-    #      key: 'Add your key here',
-    #      connection: Hurley::HttpCache.new(HurleyExcon::Connection.new)
-    #  )
+    # @example Configure SSL certificate
+    #   gmaps = Client.new(key: 'Add your key here')
+    #   gmaps.raw_client
+    #        .ssl_config
+    #        .set_client_cert_file('cert.crt', 'private.key')
     #
     # @option options [String] :key Secret key for accessing
     #     Google Maps Web Service.
@@ -104,25 +94,15 @@ module GoogleMapsService
     #     requests, in seconds.
     # @option options [Integer] :queries_per_second Number of queries per
     #     second permitted.
-    #
-    # @option options [Hurley::RequestOptions] :request_options HTTP client
-    # request options.
-    #     See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
-    # @option options [Hurley::SslOptions] :ssl_options HTTP client SSL options.
-    #     See https://github.com/lostisland/hurley/blob/master/lib/hurley/options.rb.
-    # @option options [Object] :connection HTTP client connection.
-    #     By default, the default Hurley's HTTP client connection (Net::Http)
-    #     will be used.
-    #     See https://github.com/lostisland/hurley/blob/master/README.md#connections.
     def initialize(**options)
       initialize_variables(options)
       initialize_query_tickets
     end
 
     # Get the current HTTP client.
-    # @return [Hurley::Client]
-    def client
-      @client ||= new_client
+    # @return [HTTPClient]
+    def raw_client
+      @raw_client ||= new_client
     end
 
     # Build the user agent header
@@ -147,7 +127,7 @@ module GoogleMapsService
     def get(path, params, base_url: DEFAULT_BASE_URL, accepts_client_id: true,
             response_handler: DefaultResponseHandler)
       url = base_url + generate_auth_url(path, params, accepts_client_id)
-      retriable_request(url) do |response|
+      retriable_get(url) do |response|
         response_handler.decode_response_body(response)
       end
     end
@@ -176,37 +156,16 @@ module GoogleMapsService
     end
 
     # Create a new HTTP client.
-    # @return [Hurley::Client]
+    # @return [HTTPClient]
     def new_client
-      client = Hurley::Client.new
-      client.request_options.query_class = Hurley::Query::Flat
-      client.request_options.redirection_limit = 0
-      client.header[:user_agent] = user_agent
-
-      client.connection = @connection if @connection
-      configure_request_options(client)
-      configure_ssl_options(client)
-
-      client
+      HTTPClient.new(agent_name: user_agent)
     end
 
-    def configure_request_options(client)
-      @request_options.each_pair do |k, v|
-        client.request_options[k] = v
-      end if @request_options
-    end
-
-    def configure_ssl_options(client)
-      @ssl_options.each_pair do |k, v|
-        client.ssl_options[k] = v
-      end if @ssl_options
-    end
-
-    def retriable_request(url)
+    def retriable_get(url)
       Retriable.retriable timeout: @retry_timeout, on: RETRIABLE_ERRORS do |_t|
         begin
           request_query_ticket
-          response = client.get url
+          response = raw_client.get url
         ensure
           release_query_ticket
         end

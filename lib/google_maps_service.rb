@@ -26,21 +26,6 @@ module GoogleMapsService
     # @return [Integer]
     attr_accessor :queries_per_second
 
-    # Global request_options.
-    # @see Client#initialize-instance_method
-    # @return [Hurley::RequestOptions]
-    attr_accessor :request_options
-
-    # Global ssl_options.
-    # @see Client#initialize-instance_method
-    # @return [Hurley::SslOptions]
-    attr_accessor :ssl_options
-
-    # Global connection.
-    # @see Client#initialize-instance_method
-    # @return [Object]
-    attr_accessor :connection
-
     # Configure global parameters.
     # @yield [config]
     def configure
