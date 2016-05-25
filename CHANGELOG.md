@@ -2,10 +2,16 @@
 
 ## 0.5.0
 
+* Change internal HTTP client from [Hurley](https://github.com/lostisland/hurley) to [HTTPClient](https://github.com/nahi/httpclient). This might raise some breaking changes if you configure Hurley (proxy, SSL, etc.).
+* Method `client` is renamed to `raw_client` in `GoogleMapsService::Client`
+* Flexible API options. Most of API call accept option hash parameter instead of keyword arguments.
+* Refactor lib
+
 ## 0.4.1
 
 * Support JRuby 9.0.0.0
-* Refactoring and more test coverage
+* Refactor lib
+* Add more test coverage
 
 ## 0.4.0
 
