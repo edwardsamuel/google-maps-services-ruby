@@ -6,6 +6,7 @@
 * Method `client` is renamed to `raw_client` in `GoogleMapsService::Client`
 * Flexible API options. Most of API call accept option hash parameter instead of keyword arguments.
 * Refactor lib
+* Add support for Ruby MRI 1.9
 
 ## 0.4.1
 

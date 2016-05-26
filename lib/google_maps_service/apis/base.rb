@@ -1,4 +1,5 @@
 require_relative '../validator'
+require_relative '../../core_extensions/extract_options'
 
 module GoogleMapsService
   module Apis
@@ -13,12 +14,14 @@ module GoogleMapsService
         @client.get(path, params, options)
       end
 
-      def convert(params, *keys, **options)
-        assigner(GoogleMapsService::Convert, params, keys, options)
+      def convert(params, *args)
+        options = args.extract_options!
+        assigner(GoogleMapsService::Convert, params, args, options)
       end
 
-      def validate(params, *keys, **options)
-        assigner(GoogleMapsService::Validator, params, keys, options)
+      def validate(params, *args)
+        options = args.extract_options!
+        assigner(GoogleMapsService::Validator, params, args, options)
       end
 
       def assigner(modifier, params, keys, options)

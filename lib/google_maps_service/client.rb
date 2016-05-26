@@ -94,7 +94,7 @@ module GoogleMapsService
     #     requests, in seconds.
     # @option options [Integer] :queries_per_second Number of queries per
     #     second permitted.
-    def initialize(**options)
+    def initialize(options = {})
       initialize_variables(options)
       initialize_query_tickets
     end
@@ -124,8 +124,12 @@ module GoogleMapsService
     #    to decode raw API response.
     #
     # @return [Object] Decoded response body.
-    def get(path, params, base_url: DEFAULT_BASE_URL, accepts_client_id: true,
-            response_handler: DefaultResponseHandler)
+    def get(path, params, options = {})
+      base_url = options.fetch(:base_url, DEFAULT_BASE_URL)
+      accepts_client_id = options.fetch(:accepts_client_id, true)
+      response_handler = options.fetch(:response_handler,
+                                       DefaultResponseHandler)
+
       url = base_url + generate_auth_url(path, params, accepts_client_id)
       retriable_get(url) do |response|
         response_handler.decode_response_body(response)
@@ -134,7 +138,7 @@ module GoogleMapsService
 
     protected
 
-    def initialize_variables(**options)
+    def initialize_variables(options = {})
       [
         :key, :client_id, :client_secret,
         :retry_timeout, :queries_per_second,
