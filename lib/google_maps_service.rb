@@ -1,36 +1,31 @@
 # Google Maps Web Service API.
 module GoogleMapsService
   class << self
-    # Global key.
     # @see Client#key
-    # @return [String]
+    # @return [String] The global key.
     attr_accessor :key
 
-    # Global client_id.
     # @see Client#client_id
-    # @return [String]
+    # @return [String] The global client_id.
     attr_accessor :client_id
 
-    # Global client_secret.
     # @see Client#client_secret
-    # @return [String]
+    # @return [String] The global client_secret.
     attr_accessor :client_secret
 
-    # Global retry_timeout.
     # @see Client#retry_timeout
-    # @return [Integer]
+    # @return [Integer] The global retry_timeout.
     attr_accessor :retry_timeout
 
-    # Global queries_per_second.
     # @see Client#queries_per_second
-    # @return [Integer]
+    # @return [Integer] Global queries_per_second.
     attr_accessor :queries_per_second
 
-    # Configure global parameters.
+    # Configure the global parameters.
     # @yield [config]
     def configure
       yield self
-      true
+      self
     end
   end
 

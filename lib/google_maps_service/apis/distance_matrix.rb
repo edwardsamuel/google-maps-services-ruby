@@ -4,6 +4,7 @@ module GoogleMapsService
   module Apis
     # Performs requests to the Google Maps Distance Matrix API.
     class DistanceMatrix < Base
+      # Base path of Distance Matrix API
       BASE_PATH = '/maps/api/distancematrix/json'.freeze
 
       # Gets travel distance and time for a matrix of origins and destinations.

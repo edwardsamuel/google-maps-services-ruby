@@ -31,8 +31,8 @@ module GoogleMapsService
       #
       # @param [Array] path The path to be snapped.
       #         Array of latitude/longitude pairs.
-      # @param [Boolean] interpolate Whether to interpolate a path to include
-      #         all points forming the full road-geometry. When true,
+      # @option options [Boolean] interpolate Whether to interpolate a path
+      #         to include all points forming the full road-geometry. When true,
       #         additional interpolated points will also be returned,
       #         resulting in a path that smoothly follows the geometry of
       #         the road, even around corners and through tunnels.

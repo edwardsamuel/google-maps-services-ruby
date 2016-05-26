@@ -11,8 +11,8 @@ module GoogleMapsService
     #
     # @param [String] path The path portion of the URL.
     # @param [Hash] params URL parameters.
-    # @param [Boolean] accepts_client_id Sign the request using API {#keys}
-    #   instead of {#client_id}.
+    # @param [Boolean] accepts_client_id Sign the request using API
+    #   {Client#key} instead of {Client#client_id}.
     #
     # @return [String]
     def generate_auth_url(path, params, accepts_client_id)
@@ -75,6 +75,11 @@ module GoogleMapsService
       parts.join
     end
 
+    # Unquote  part of string
+    #
+    # @param [String] str
+    #
+    # @return [String]
     def unquote_part(str)
       /^(?<w1>[\h]{2})(?<w2>.*)/ =~ str[0..1]
       if UNRESERVED_SET.include?(w1.to_i(16).chr)
@@ -84,19 +89,31 @@ module GoogleMapsService
       end
     end
 
+    protected
+
     # The unreserved URI characters (RFC 3986)
     UNRESERVED_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' \
                      'abcdefghijklmnopqrstuvwxyz' \
                      '0123456789-._~'.freeze
 
-    protected
-
+    # Create url based on path, params, client id, and client secrets.
+    #
+    # @param [String] path Url path.
+    # @param [Hash] params Url parameters.
+    #
+    # @return [String] The full url.
     def build_client_id_url(path, params)
       params << ['client', @client_id]
       path = [path, urlencode_params(params)].join('?')
       "#{path}&signature=#{sign_hmac(@client_secret, path)}"
     end
 
+    # Create url based on path, params, and api key.
+    #
+    # @param [String] path Url path.
+    # @param [Hash] params Url parameters.
+    #
+    # @return [String] The full url.
     def build_api_key_url(path, params)
       params << ['key', @key]
       "#{path}?#{urlencode_params(params)}"

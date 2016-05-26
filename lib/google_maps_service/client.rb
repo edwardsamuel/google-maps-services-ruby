@@ -28,25 +28,25 @@ module GoogleMapsService
     # Can be obtained at
     # https://developers.google.com/maps/documentation/geocoding/get-api-key#key.
     #
-    # @return [String]
+    # @return [String] The secret key.
     attr_accessor :key
 
     # Client id for using Maps API for Work services.
-    # @return [String]
+    # @return [String] The client id.
     attr_accessor :client_id
 
     # Client secret for using Maps API for Work services.
-    # @return [String]
+    # @return [String] The client secret.
     attr_accessor :client_secret
 
     # Timeout across multiple retriable requests, in seconds.
-    # @return [Integer]
+    # @return [Integer] The retry timeout.
     attr_accessor :retry_timeout
 
     # Number of queries per second permitted.
     # If the rate limit is reached, the client will sleep for
     # the appropriate amount of time before it runs the current query.
-    # @return [Integer]
+    # @return [Integer] The query per second limit.
     attr_reader :queries_per_second
 
     # Construct Google Maps Web Service API client.
@@ -117,10 +117,11 @@ module GoogleMapsService
     #
     # @param [String] path Url path.
     # @param [String] params Request parameters.
-    # @param [String] base_url Base Google Maps Web Service API endpoint url.
-    # @param [Boolean] accepts_client_id Sign the request using API {#keys}
-    #    instead of {#client_id}.
-    # @param [Method] custom_response_decoder Custom method
+    # @option options [String] base_url Base Google Maps Web Service API
+    #    endpoint url.
+    # @option options [Boolean] accepts_client_id Sign the request using API
+    #    {#key} instead of {#client_id}.
+    # @option options [Method] custom_response_decoder Custom method
     #    to decode raw API response.
     #
     # @return [Object] Decoded response body.
@@ -138,6 +139,10 @@ module GoogleMapsService
 
     protected
 
+    # Initialize instance variable from optional parameters or GoogleMapsService
+    # instance variable.
+    #
+    # @param [Hash] options Options that want to be set up.
     def initialize_variables(options = {})
       [
         :key, :client_id, :client_secret,
@@ -165,6 +170,12 @@ module GoogleMapsService
       HTTPClient.new(agent_name: user_agent)
     end
 
+    # Call HTTP GET request and try to retry if there is failure
+    #
+    # @param [String] url The full url.
+    #
+    # @yield [response] Response handler.
+    # @yieldparam [String] response The response object.
     def retriable_get(url)
       Retriable.retriable timeout: @retry_timeout, on: RETRIABLE_ERRORS do |_t|
         begin

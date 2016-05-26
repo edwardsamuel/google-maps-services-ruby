@@ -8,9 +8,9 @@ module GoogleMapsService
     # Extract and parse body response as hash.
     # Throw an error if there is something wrong with the response.
     #
-    # @param [Hurley::Response] response Web API response.
+    # @param [Object] response Web API response.
     #
-    # @return [Hash] Response body as hash. The hash key will be symbolized.
+    # @return [Hash] Response body as `Hash`. The hash key will be symbolized.
     def decode_response_body(response)
       if response_ok?(response)
         body = MultiJson.load(response.body, symbolize_keys: true)
@@ -21,13 +21,18 @@ module GoogleMapsService
       end
     end
 
+    # Check if whether HTTP response status code is success or not.
+    #
+    # @param [Object] response Web API response.
+    #
+    # @return [boolean] Return `true` if the status code is 2xx.
     def response_ok?(response)
       (200..300).cover?(response.status_code)
     end
 
     # Check HTTP response status code. Raise error if the status is not 2xx.
     #
-    # @param [Hurley::Response] response Web API response.
+    # @param [Object] response Web API response.
     def check_response_status_code(response)
       case response.status_code
       when 301, 302, 303, 307
@@ -43,7 +48,7 @@ module GoogleMapsService
 
     # Check response body for error status.
     #
-    # @param [Hurley::Response] response Response object.
+    # @param [Object] response Response object.
     # @param [Hash] body Response body.
     #
     # @return [void]

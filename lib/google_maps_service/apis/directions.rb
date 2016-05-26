@@ -4,6 +4,8 @@ module GoogleMapsService
   module Apis
     # Performs requests to the Google Maps Directions API.
     class Directions < Base
+      # Base path of Directions API
+      BASE_PATH = '/maps/api/directions/json'.freeze
 
       # Get directions between an origin point and a destination point.
       #
@@ -33,38 +35,39 @@ module GoogleMapsService
       # @param [String, Hash, Array] destination The address or
       #     latitude/longitude value from which you wish to calculate
       #     directions.
-      # @param [String] mode Specifies the mode of transport to use when
-      #     calculating directions. One of `driving`, `walking`, `bicycling` or
-      #     `transit`.
-      # @param [Array<String>, Array<Hash>, Array<Array>] waypoints Specifies
-      #     an array of waypoints. Waypoints alter a route by routing it
-      #     through the specified location(s).
-      # @param [Boolean] alternatives If True, more than one route may be
-      #     returned in the response.
-      # @param [Array, String] avoid Indicates that the calculated route(s)
-      #     should avoid the indicated features.
-      # @param [String] language The language in which to return results.
-      # @param [String] units Specifies the unit system to use when displaying
-      #     results: `metric` or `imperial`.
-      # @param [String] region The region code, specified as a ccTLD
+      # @option options [String] mode Specifies the mode of transport to use
+      #     when calculating directions. One of `driving`, `walking`,
+      #     `bicycling` or `transit`.
+      # @option options [Array<String>, Array<Hash>, Array<Array>] waypoints
+      #     Specifies an array of waypoints. Waypoints alter a route by routing
+      #     it through the specified location(s).
+      # @option options [Boolean] alternatives If True, more than one route
+      #     may be returned in the response.
+      # @option options [Array, String] avoid Indicates that the calculated
+      #     route(s) should avoid the indicated features.
+      # @option options [String] language The language in which to return
+      #     results.
+      # @option options [String] units Specifies the unit system to use when
+      #     displaying results: `metric` or `imperial`.
+      # @option options [String] region The region code, specified as a ccTLD
       #     (_top-level domain_) two-character value.
-      # @param [Integer, DateTime] departure_time Specifies the desired
+      # @option options [Integer, DateTime] departure_time Specifies the desired
       #     time of departure.
-      # @param [Integer, DateTime] arrival_time Specifies the desired
+      # @option options [Integer, DateTime] arrival_time Specifies the desired
       #     time of arrival for transit directions.
       #     Note: you can not specify both `departure_time` and `arrival_time`.
-      # @param [Boolean] optimize_waypoints Optimize the provided route by
-      #     rearranging the waypoints in a more efficient order.
-      # @param [String, Array<String>] transit_mode Specifies one or more
-      #     preferred modes of transit.
+      # @option options [Boolean] optimize_waypoints Optimize the provided route
+      #     by rearranging the waypoints in a more efficient order.
+      # @option options [String, Array<String>] transit_mode Specifies one or
+      #     more preferred modes of transit.
       #     This parameter may only be specified for requests where the mode is
       #     transit. Valid values are `bus`, `subway`, `train`, `tram` or
       #     `rail`. The `rail` is equivalent to `["train", "tram", "subway"]`.
-      # @param [String] transit_routing_preference Specifies preferences for
-      #     transit requests. Valid values are `less_walking` or
+      # @option options [String] transit_routing_preference Specifies
+      #     preferences for transit requests. Valid values are `less_walking` or
       #     `fewer_transfers`.
-      # @param [String] traffic_model Specifies the predictive travel time
-      #    model to use.
+      # @option options [String] traffic_model Specifies the predictive travel
+      #    time model to use.
       #    The valid values are `best_guess`, `optimistic` or `pessimistic`.
       #
       # @return [Array] Array of routes.
@@ -93,7 +96,7 @@ module GoogleMapsService
                                'and arrival_time.'
         end
 
-        get('/maps/api/directions/json', params)[:routes]
+        get(BASE_PATH, params)[:routes]
       end
     end
   end

@@ -4,6 +4,9 @@ module GoogleMapsService
   module Apis
     # Performs requests to the Google Maps Elevation API.
     class Elevation < Base
+      # Base path of Elevation API
+      BASE_PATH = '/maps/api/elevation/json'.freeze
+
       # Provides elevation data for locations provided on the surface of
       # the earth, including depth locations on the ocean floor (which return
       # negative values).
@@ -27,7 +30,7 @@ module GoogleMapsService
           locations: GoogleMapsService::Convert.waypoints(locations)
         }
 
-        get('/maps/api/elevation/json', params)[:results]
+        get(BASE_PATH, params)[:results]
       end
 
       # Provides elevation data sampled along a path on the surface
@@ -37,11 +40,11 @@ module GoogleMapsService
       #   locations = [[40.714728, -73.998672], [-34.397, 150.644]]
       #   results = client.elevation_along_path(locations, 5)
       #
-      # @param [String, Array] path A encoded polyline string, or a list of
-      #         latitude/longitude pairs from which you wish to calculate
-      #         elevation data.
-      # @param [Integer] samples The number of sample points along a path for
-      #         which to return elevation data.
+      # @option options [String, Array] path A encoded polyline string,
+      #         or a list of latitude/longitude pairs from which you wish to
+      #         calculate elevation data.
+      # @option options [Integer] samples The number of sample points along
+      #         a path for which to return elevation data.
       #
       # @return [Array] Array of elevation data responses
       def elevation_along_path(path, samples)
@@ -56,7 +59,7 @@ module GoogleMapsService
           samples: samples
         }
 
-        get('/maps/api/elevation/json', params)[:results]
+        get(BASE_PATH, params)[:results]
       end
     end
   end
