@@ -104,6 +104,42 @@ module GoogleMapsService::Apis
                  custom_response_decoder: method(:extract_roads_body))
     end
 
+    # Returns the Nearest road segments for provided points in a path.
+    #
+    # Takes up to 100 independent coordinates, and returns the closest road segment for each point.
+    # The points passed do not need to be part of a continuous path.
+    #
+    # @example Single point snap
+    #   results = client.nearest_roads([40.714728, -73.998672])
+    #
+    # @example Multi points snap
+    #   path = [
+    #       [-33.8671, 151.20714],
+    #       [-33.86708, 151.20683000000002],
+    #       [-33.867070000000005, 151.20674000000002],
+    #       [-33.86703, 151.20625]
+    #   ]
+    #   results = client.nearest_roads(path)
+    #
+    # @param [Array] path The path to be match to nearest road segment. Array of latitude/longitude pairs.
+    #
+    # @return [Array] Array of snapped points.
+
+    def nearest_roads(points)
+      points = GoogleMapsService::Convert.waypoints(points)
+
+      params = {
+              points: points
+      }
+
+      return get('/v1/nearestRoads', params,
+                 base_url: ROADS_BASE_URL,
+                 accepts_client_id: false,
+                 custom_response_decoder: method(:extract_roads_body))[:snappedPoints]
+    end
+
+
+
     private
       # Extracts a result from a Roads API HTTP response.
       def extract_roads_body(response)
@@ -146,5 +182,6 @@ module GoogleMapsService::Apis
             raise GoogleMapsService::Error::ApiError.new(response), error[:message]
         end
       end
+
   end
 end

@@ -17,6 +17,20 @@ describe GoogleMapsService::Apis::Roads do
     end
   end
 
+  context '#nearest_roads' do
+    before(:example) do
+      stub_request(:get, /https:\/\/roads.googleapis.com\/v1\/nearestRoads/)
+              .to_return(:status => 200, headers: { 'Content-Type' => 'application/json' }, body: '{"snappedPoints":["foo"]}')
+    end
+
+    context 'match' do
+      it 'should call Google Maps Web Service' do
+        results = client.nearest_roads([40.714728, -73.998672])
+        expect(a_request(:get, 'https://roads.googleapis.com/v1/nearestRoads?points=40.714728%%2C-73.998672&key=%s' % api_key)).to have_been_made
+      end
+    end
+  end
+
   context '#snapped_speed_limits' do
     before(:example) do
       stub_request(:get, /https:\/\/roads.googleapis.com\/v1\/speedLimits/)
