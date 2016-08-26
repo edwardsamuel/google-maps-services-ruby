@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+* Add nearest roads Google Roads API support
+
 ## 0.4.1
 
 * Support JRuby 9.0.0.0

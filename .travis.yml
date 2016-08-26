@@ -6,3 +6,10 @@ rvm:
   - 2.0.0
   - jruby-head
   - jruby-9000
+matrix:
+  allow_failures:
+    - rvm: jruby-head
+addons:
+  apt:
+    packages:
+      - libgmp3-dev
